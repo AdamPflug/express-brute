@@ -1,0 +1,15 @@
+{
+	"name": "express-brute",
+	"version": "0.0.1",
+	"private": false,
+	"scripts": {
+		"test": "node node_modules/jasmine-node/lib/jasmine-node/cli.js --captureExceptions --matchall spec"
+	},
+	"repository": {
+		"type": "git",
+		"repository": "git@github.com:AdamPflug/express-brute.git"
+	},
+	"devDependencies": {
+		"jasmine-node": "~1.11.0"
+	}
+}
