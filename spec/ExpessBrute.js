@@ -115,8 +115,8 @@ describe("express brute", function () {
 			brute.prevent(req, res, nextSpy);
 			expect(res.status).toHaveBeenCalledWith(403);
 			expect(nextSpy.calls.length).toEqual(2);
-			expect(res.nextRequestAllowed).toBeDefined();
-			expect(res.nextRequestAllowed instanceof Date).toBeTruthy();
+			expect(res.nextValidRequestDate).toBeDefined();
+			expect(res.nextValidRequestDate instanceof Date).toBeTruthy();
 		});
 	});
 });

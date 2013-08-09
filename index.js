@@ -45,12 +45,12 @@ ExpressBrute.prototype.reset = function (req, callback) {
 	this.store.reset(req.connection.remoteAddress, callback);
 };
 
-ExpressBrute.FailForbidden = function (req, res, next, nextValidRequestTime) {
-	res.send(403, {error: {text: "Too many requests in this time frame.", nextValidRequestTime: nextValidRequestTime}});
+ExpressBrute.FailForbidden = function (req, res, next, nextValidRequestDate) {
+	res.send(403, {error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
 };
-ExpressBrute.FailMark = function (req, res, next, nextValidRequestTime) {
+ExpressBrute.FailMark = function (req, res, next, nextValidRequestDate) {
 	res.status(403);
-	res.nextRequestAllowed = nextValidRequestTime;
+	res.nextValidRequestDate = nextValidRequestDate;
 	next();
 };
 ExpressBrute.MemoryStore = require('./lib/MemoryStore');
