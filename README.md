@@ -13,29 +13,29 @@ Installation
 
 Example
 -------
-	```javascript
-	var ExpressBrute = require('express-brute'),
-	    bruteforceStore;
-	
-	if (config.environment == 'development'){
-		bruteforceStore = new ExpressBrute.MemoryStore(); // stores state locally, don't use this in production
-	} else {
-		bruteforceStore = new ExpressBrute.MemcachedStore(['127.0.0.1']); // stores state with memcached
-	}
-	var bruteforce = new ExpressBrute(bruteforceStore);
+``` js
+var ExpressBrute = require('express-brute'),
+    bruteforceStore;
 
-	app.post('/auth',
-		bruteforce.prevent, // error 403 if we hit this route too often
-		function (req, res, next) {
-			if (loginSuccessful) {
-				bruteforce.reset(req); // reset the failure counter
-				res.redirect('/'); // logged in, to the home page
-			} else {
-				res.redirect('/login'); // bad username/password, back to the login page
-			}
+if (config.environment == 'development'){
+	bruteforceStore = new ExpressBrute.MemoryStore(); // stores state locally, don't use this in production
+} else {
+	bruteforceStore = new ExpressBrute.MemcachedStore(['127.0.0.1']); // stores state with memcached
+}
+var bruteforce = new ExpressBrute(bruteforceStore);
+
+app.post('/auth',
+	bruteforce.prevent, // error 403 if we hit this route too often
+	function (req, res, next) {
+		if (loginSuccessful) {
+			bruteforce.reset(req); // reset the failure counter
+			res.redirect('/'); // logged in, to the home page
+		} else {
+			res.redirect('/login'); // bad username/password, back to the login page
 		}
-	);
-	```
+	}
+);
+```
 
 Options
 -------
