@@ -40,19 +40,19 @@ app.post('/auth',
 Options
 -------
 ### ExpressBrute(options)
-	- `freeRetries` The number of retires the user has before they need to start waiting (default: 2)
-	- `minWait` The initial wait time (in milliseconds) after the user runs out of retries (default: 500 milliseconds)
-	- `maxWait` The maximum amount of time (in milliseconds) between requests the user needs to wait (default: 15 minutes). The wait for a given request is determined by adding the time the user needed to wait for the previous two times.
-	- `failCallback` gets called with (`req`, `resp`, `next`, `nextValidRequestDate`) when a request is rejected (default: ExpressBrute.FailForbidden)
+- `freeRetries` The number of retires the user has before they need to start waiting (default: 2)
+- `minWait` The initial wait time (in milliseconds) after the user runs out of retries (default: 500 milliseconds)
+- `maxWait` The maximum amount of time (in milliseconds) between requests the user needs to wait (default: 15 minutes). The wait for a given request is determined by adding the time the user needed to wait for the previous two times.
+- `failCallback` gets called with (`req`, `resp`, `next`, `nextValidRequestDate`) when a request is rejected (default: ExpressBrute.FailForbidden)
 
 ### ExpressBrute.MemcachedStore(hosts, options)
-	- `hosts` Memcached servers locations, can by string, array, or hash.
-	- `options`
-		- `prefix`   An optional prefix for each memcache key, in case you are sharing 
-		             your memcached servers with something generating its own keys.
-		- `lifetime` The length of time (in milliseconds) to remember failed login attempts
-		             (refreshed on each failure).
-		- ...        The rest of the options will be passed directly to the node-memcached constructor.
+- `hosts` Memcached servers locations, can by string, array, or hash.
+- `options`
+	- `prefix`   An optional prefix for each memcache key, in case you are sharing 
+	             your memcached servers with something generating its own keys.
+	- `lifetime` The length of time (in milliseconds) to remember failed login attempts
+	             (refreshed on each failure).
+	- ...        The rest of the options will be passed directly to the node-memcached constructor.
 
 For details see [node-memcached](http://github.com/3rd-Eden/node-memcached).
 
