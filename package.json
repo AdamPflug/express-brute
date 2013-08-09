@@ -1,7 +1,7 @@
 {
   "name": "express-brute",
   "version": "0.1.0",
-  "description": "A brute-force protection middleware for express routes that rate limitings incoming requests",
+  "description": "A brute-force protection middleware for express routes that rate limits incoming requests",
   "keywords": ["brute", "force", "bruteforce", "attack", "fibonacci", "rate", "limit", "security"],
   "license" : "BSD",
   "private": false,
