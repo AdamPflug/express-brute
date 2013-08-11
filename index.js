@@ -24,27 +24,38 @@ var ExpressBrute = module.exports = function (store, options) {
 	this.delays[this.delays.length-1] = this.options.maxWait;
 };
 ExpressBrute.prototype.prevent = function (req, res, next) {
-	this.store.increment(req.connection.remoteAddress, _.bind(function (err, value) {
+	this.store.get(req.connection.remoteAddress, _.bind(function (err, value) {
 		if (err) {
-			throw "Cannot increment request count";
+			throw "Cannot get request count";
 		}
 
-		if (value.count < 1) {
-			next();
+		var count = 0,
+			delayIndex = 0,
+			lastValidRequestTime = this.now();
+		if (value) {
+			count = value.count;
+			delayIndex = (count < this.delays.length ? count : this.delays.length) - 1;
+			lastValidRequestTime = value.lastRequest.getTime();
+		}
+		var nextValidRequestTime = lastValidRequestTime+this.delays[delayIndex];
+			
+		if (count < 1 || nextValidRequestTime < this.now()) {
+			this.store.set(req.connection.remoteAddress, {count: count+1, lastRequest: new Date(this.now())}, function (err) {
+				if (err) {
+					throw "Cannot increment request count";
+				}
+				typeof next == 'function' && next();
+			});
 		} else {
-			var delayIndex = (value.count < this.delays.length ? value.count : this.delays.length) - 1;
-			var lastValidRequestTime = value.lastRequest.getTime()+this.delays[delayIndex];
-			if (lastValidRequestTime < Date.now()) {
-				next();
-			} else {
-				var nextValidRequestTime = Date.now()+this.delays[delayIndex];
-				this.options.failCallback(req, res, next, new Date(nextValidRequestTime));
-			}
+			this.options.failCallback(req, res, next, new Date(nextValidRequestTime));
 		}
 	}, this));
 };
 ExpressBrute.prototype.reset = function (req, callback) {
 	this.store.reset(req.connection.remoteAddress, callback);
+};
+ExpressBrute.prototype.now = function () {
+	return Date.now();
 };
 
 ExpressBrute.FailForbidden = function (req, res, next, nextValidRequestDate) {

@@ -67,11 +67,8 @@ describe("express brute", function () {
 				done = false;
 				brute.prevent(req, new ResponseMock(), nextSpy);
 				expect(errorSpy).not.toHaveBeenCalled();
-				setTimeout(function() {
-					done = true;
-				}, brute.delays[0]+1);
 			});
-			waitsFor(function () { return done; });
+			waits(brute.delays[0]+1);
 			runs(function () {
 				brute.prevent(req, new ResponseMock(), nextSpy);
 				expect(errorSpy).not.toHaveBeenCalled();
@@ -91,12 +88,16 @@ describe("express brute", function () {
 			expect(errorSpy).not.toHaveBeenCalled();
 		});
 		it ('passes the correct next request time', function () {
+			var curTime = Date.now(),
+			    expectedTime = curTime+brute.delays[0];
 			runs(function () {
+				var oldNow = brute.now;
+				brute.now = function () { return curTime; };
 				brute.prevent(req, new ResponseMock(), nextSpy);
+				brute.now = oldNow;
 			});
-			waits(5);
+			waits(1); // ensure some time has passed before calling the next time, caught a bug
 			runs(function () {
-				var expectedTime = Date.now()+brute.delays[0];
 				brute.prevent(req, new ResponseMock(), errorSpy);
 				expect(errorSpy).toHaveBeenCalled();
 				expect(errorSpy.mostRecentCall.args[3].getTime()).toEqual(expectedTime);
@@ -115,10 +116,14 @@ describe("express brute", function () {
 				brute.prevent(req, new ResponseMock(), nextSpy);
 				brute.options.failCallback = errorSpy;
 			});
-			waits(brute.delays[0]);
+			waits(brute.delays[0]+1);
 			runs(function () {
+				var curTime = Date.now();
+				    expectedTime = curTime+brute.delays[0];
+				    oldNow = brute.now;
+				brute.now = function () { return curTime; };
 				brute.prevent(req, new ResponseMock(), nextSpy);
-				var expectedTime = Date.now()+brute.delays[brute.delays.length-1];
+				brute.now = oldNow;
 				brute.prevent(req, new ResponseMock(), nextSpy);
 				expect(errorSpy).toHaveBeenCalled();
 				expect(errorSpy.mostRecentCall.args[3].getTime()).toEqual(expectedTime);

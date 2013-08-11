@@ -1,9 +1,18 @@
 {
   "name": "express-brute",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A brute-force protection middleware for express routes that rate limits incoming requests",
-  "keywords": ["brute", "force", "bruteforce", "attack", "fibonacci", "rate", "limit", "security"],
-  "license" : "BSD",
+  "keywords": [
+    "brute",
+    "force",
+    "bruteforce",
+    "attack",
+    "fibonacci",
+    "rate",
+    "limit",
+    "security"
+  ],
+  "license": "BSD",
   "private": false,
   "scripts": {
     "test": "node node_modules/jasmine-node/lib/jasmine-node/cli.js --captureExceptions --matchall spec"
