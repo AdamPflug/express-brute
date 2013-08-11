@@ -52,7 +52,7 @@ describe("Express brute memory store", function () {
 
 		runs(function () {
 			expect(callback.mostRecentCall.args[0]).toBe(null);
-			expect(callback.mostRecentCall.args[1]).toEqual(object);
+			expect(callback.mostRecentCall.args[1]).toEqual({count: 1, lastRequest: object.lastRequest});
 
 			instance.get("1.2.3.4", callback);
 		});

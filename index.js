@@ -17,10 +17,10 @@ var ExpressBrute = module.exports = function (store, options) {
 		this.delays[i] = 0;
 	}
 	this.delays.push(this.options.minWait);
-	do {
+	while(this.delays[this.delays.length-1] < this.options.maxWait) {
 		var nextNum = this.delays[this.delays.length-1] + (this.delays.length > 1 ? this.delays[this.delays.length-2] : 0);
 		this.delays.push(nextNum);
-	} while(this.delays[this.delays.length-1] < this.options.maxWait);
+	}
 	this.delays[this.delays.length-1] = this.options.maxWait;
 };
 ExpressBrute.prototype.prevent = function (req, res, next) {
@@ -32,10 +32,12 @@ ExpressBrute.prototype.prevent = function (req, res, next) {
 		if (value.count < 1) {
 			next();
 		} else {
-			var nextValidRequestTime = value.lastRequest.getTime()+this.delays[value.count-1];
-			if (nextValidRequestTime < Date.now()) {
+			var delayIndex = (value.count < this.delays.length ? value.count : this.delays.length) - 1;
+			var lastValidRequestTime = value.lastRequest.getTime()+this.delays[delayIndex];
+			if (lastValidRequestTime < Date.now()) {
 				next();
 			} else {
+				var nextValidRequestTime = Date.now()+this.delays[delayIndex];
 				this.options.failCallback(req, res, next, new Date(nextValidRequestTime));
 			}
 		}

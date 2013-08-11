@@ -41,6 +41,15 @@ describe("express brute", function () {
 			});
 			expect(brute.delays).toEqual([0,10,10,20,30,50,80,100]);
 		});
+		it('correctly calculates delays when min and max wait are the same', function () {
+			brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: 10,
+				maxWait: 10,
+				failCallback: errorSpy
+			});
+			expect(brute.delays).toEqual([10]);
+		});
 		it ('calls next when the request is allowed', function () {
 			brute.prevent(req, new ResponseMock(), nextSpy);
 			expect(nextSpy.calls.length).toEqual(1);
@@ -60,7 +69,7 @@ describe("express brute", function () {
 				expect(errorSpy).not.toHaveBeenCalled();
 				setTimeout(function() {
 					done = true;
-				}, brute.delays[3]);
+				}, brute.delays[0]+1);
 			});
 			waitsFor(function () { return done; });
 			runs(function () {
@@ -80,6 +89,40 @@ describe("express brute", function () {
 			expect(errorSpy).not.toHaveBeenCalled();
 			brute.prevent(req2, new ResponseMock(), nextSpy);
 			expect(errorSpy).not.toHaveBeenCalled();
+		});
+		it ('passes the correct next request time', function () {
+			runs(function () {
+				brute.prevent(req, new ResponseMock(), nextSpy);
+			});
+			waits(5);
+			runs(function () {
+				var expectedTime = Date.now()+brute.delays[0];
+				brute.prevent(req, new ResponseMock(), errorSpy);
+				expect(errorSpy).toHaveBeenCalled();
+				expect(errorSpy.mostRecentCall.args[3].getTime()).toEqual(expectedTime);
+			});
+			
+		});
+		it('works even after the maxwait is reached', function () {
+			brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: 10,
+				maxWait: 10,
+				failCallback: function () {}
+			});
+			runs(function () {
+				brute.prevent(req, new ResponseMock(), nextSpy);
+				brute.prevent(req, new ResponseMock(), nextSpy);
+				brute.options.failCallback = errorSpy;
+			});
+			waits(brute.delays[0]);
+			runs(function () {
+				brute.prevent(req, new ResponseMock(), nextSpy);
+				var expectedTime = Date.now()+brute.delays[brute.delays.length-1];
+				brute.prevent(req, new ResponseMock(), nextSpy);
+				expect(errorSpy).toHaveBeenCalled();
+				expect(errorSpy.mostRecentCall.args[3].getTime()).toEqual(expectedTime);
+			});
 		});
 	});
 	describe("failure handlers", function () {
