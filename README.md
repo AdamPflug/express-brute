@@ -50,7 +50,7 @@ Options
 - `options`
 	- `prefix`   An optional prefix for each memcache key, in case you are sharing 
 	             your memcached servers with something generating its own keys.
-	- `lifetime` The length of time (in milliseconds) to remember failed login attempts
+	- `lifetime` The length of time (in seconds) to remember failed login attempts
 	             (refreshed on each failure).
 	- ...        The rest of the options will be passed directly to the node-memcached constructor.
 
