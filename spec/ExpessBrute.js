@@ -56,6 +56,11 @@ describe("express brute", function () {
 			brute.prevent(req, new ResponseMock(), nextSpy);
 			expect(nextSpy.calls.length).toEqual(1);
 		});
+		it('adds a reference to itself the request object', function () {
+			spyOn(brute, 'prevent').andCallThrough();
+			brute.prevent(req, new ResponseMock(), nextSpy);
+			expect(brute.prevent.mostRecentCall.args[0].brute).toEqual(brute);
+		});
 		it ('calls the error callback when requests come in too quickly', function () {
 			brute.prevent(req, new ResponseMock(), nextSpy);
 			expect(errorSpy).not.toHaveBeenCalled();

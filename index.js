@@ -24,6 +24,7 @@ var ExpressBrute = module.exports = function (store, options) {
 	this.delays[this.delays.length-1] = this.options.maxWait;
 };
 ExpressBrute.prototype.prevent = function (req, res, next) {
+	req.brute = this; // store a reference to this so it's easier to reset the counter from routes
 	this.store.get(req.connection.remoteAddress, _.bind(function (err, value) {
 		if (err) {
 			throw "Cannot get request count";

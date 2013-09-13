@@ -28,7 +28,7 @@ app.post('/auth',
 	bruteforce.prevent, // error 403 if we hit this route too often
 	function (req, res, next) {
 		if (loginSuccessful) {
-			bruteforce.reset(req); // reset the failure counter
+			req.brute.reset(req); // reset the failure counter
 			res.redirect('/'); // logged in, to the home page
 		} else {
 			res.redirect('/login'); // bad username/password, back to the login page
@@ -50,11 +50,22 @@ Options
 - `options`
 	- `prefix`   An optional prefix for each memcache key, in case you are sharing 
 	             your memcached servers with something generating its own keys.
-	- `lifetime` The length of time (in seconds) to remember failed login attempts
-	             (refreshed on each failure).
+	- `lifetime` The length of time (in seconds since the last request) to remember the number
+	             of requests that have been made by an IP.
 	- ...        The rest of the options will be passed directly to the node-memcached constructor.
 
 For details see [node-memcached](http://github.com/3rd-Eden/node-memcached).
+
+Instance Methods
+----------------
+- `protect(req, res, next)` Middleware that will bounce requests that happen faster than
+                            the current wait time by calling `failCallback`
+- `reset(req, callback)`    Resets the wait time between requests back to its initial value.
+                            For example, if you are protecting a login route you probably want to 
+                            call this on successful login, otherwise other users trying to log in 
+                            from that ip will experience more aggressive request throttling than 
+                            they should.
+
 
 Built-in failure callbacks
 ---------------------------
