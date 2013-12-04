@@ -5,7 +5,7 @@ var MemcachedStore = proxyquire('../lib/MemcachedStore', {'memcached': Memcached
 describe("Express brute memory store", function () {
 	var instance, callback, store;
 	beforeEach(function () {
-		instance = new MemcachedStore([], {prefix: 'test'});
+		instance = new MemcachedStore([], {prefix: 'test', lifetime: 0});
 		callback = jasmine.createSpy();
 	});
 
@@ -20,7 +20,7 @@ describe("Express brute memory store", function () {
 			instance.set("1.2.3.4", object, callback);
 		});
 
-		waitsFor(function () { return callback.call.length == 1; });
+		waitsFor(function () { return callback.calls.length == 1; });
 		
 		runs(function () {
 			expect(callback).toHaveBeenCalledWith(null);
@@ -42,7 +42,7 @@ describe("Express brute memory store", function () {
 			instance.set("1.2.3.4", object, callback);
 		});
 
-		waitsFor(function () { return callback.call.length == 1; });
+		waitsFor(function () { return callback.calls.length == 1; });
 		
 		runs(function () {
 			expect(callback).toHaveBeenCalledWith(null);
@@ -107,7 +107,7 @@ describe("Express brute memory store", function () {
 			instance.set("1.2.3.4", object, callback);
 		});
 
-		waitsFor(function () { return callback.call.length == 1; });
+		waitsFor(function () { return callback.calls.length == 1; });
 		
 		runs(function () {
 			expect(callback).toHaveBeenCalledWith(null);
@@ -133,6 +133,48 @@ describe("Express brute memory store", function () {
 		});
 
 		waitsFor(function () { return callback.calls.length == 4; });
+
+		runs(function () {
+			expect(callback.mostRecentCall.args[0]).toBe(null);
+			expect(callback.mostRecentCall.args[1]).toEqual(null);
+		});
+	});
+	it("supports data expiring", function () {
+		var curDate = new Date(),
+		    object = {count: 1, lastRequest: curDate};
+
+		var instance = new MemcachedStore([], {prefix: 'test', lifetime: 1});
+
+		runs(function () {
+			instance.set("1.2.3.4", object, callback);
+		});
+
+		waitsFor(function () { return callback.calls.length == 1; });
+		
+		runs(function () {
+			expect(callback).toHaveBeenCalledWith(null);
+		});
+
+		waits(500);
+
+		runs(function () {
+			instance.get("1.2.3.4", callback);
+		});
+
+		waitsFor(function () { return callback.calls.length == 2; });
+
+		runs(function () {
+			expect(callback.mostRecentCall.args[0]).toBe(null);
+			expect(callback.mostRecentCall.args[1]).toEqual(object);
+		});
+
+		waits(500);
+
+		runs(function () {
+			instance.get("1.2.3.4", callback);
+		});
+
+		waitsFor(function () { return callback.calls.length == 3; });
 
 		runs(function () {
 			expect(callback.mostRecentCall.args[0]).toBe(null);

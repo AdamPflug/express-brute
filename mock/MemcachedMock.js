@@ -1,16 +1,27 @@
 var _ = require('underscore');
 
-var MemcachedMock = module.exports = function (options) {
+var MemcachedMock = module.exports = function () {
 	this.data = {};
 };
 MemcachedMock.prototype.set = function (key, value, lifetime, callback) {
+	if (!this.data[key]) {
+		this.data[key] = {};
+	} else if (this.data[key].timeout) {
+		clearTimeout(this.data[key].timeout);
+	}
 	this.data[key] = value;
-	callback(null);
+
+	if (lifetime) {
+		this.data[key].timeout = setTimeout(_.bind(function () {
+			delete this.data[key];
+		}, this), 1000*lifetime);
+	}
+	typeof callback == 'function' && callback(null);
 };
 MemcachedMock.prototype.get = function (key, callback) {
-	callback(null, this.data[key]);
+	typeof callback == 'function' && callback(null, this.data[key]);
 };
 MemcachedMock.prototype.del = function (key, callback) {
 	delete this.data[key];
-	callback(null);
+	typeof callback == 'function' && callback(null);
 };
