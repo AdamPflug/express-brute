@@ -134,6 +134,35 @@ describe("express brute", function () {
 				expect(errorSpy.mostRecentCall.args[3].getTime()).toEqual(expectedTime);
 			});
 		});
+		it('correctly calculates default lifetime', function () {
+			brute = new ExpressBrute(store, {
+				freeRetries: 1,
+				minWait: 100,
+				maxWait: 1000,
+				failCallback: errorSpy
+			});
+			expect(brute.options.lifetime).toEqual(8);
+		});
+		it('allows requests after the lifetime causes them to expire', function () {
+			brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: 10000,
+				maxWait: 10000,
+				lifetime: 1,
+				failCallback: errorSpy
+			});
+			runs(function () {
+				brute.prevent(req, new ResponseMock(), nextSpy);
+				expect(errorSpy).not.toHaveBeenCalled();
+				brute.prevent(req, new ResponseMock(), nextSpy);
+				expect(errorSpy).toHaveBeenCalled();
+			});
+			waits((brute.options.lifetime*1000)+1);
+			runs(function () {
+				brute.prevent(req, new ResponseMock(), nextSpy);
+				expect(errorSpy.calls.length).toEqual(1);
+			});
+		});
 	});
 	describe("failure handlers", function () {
 		var brute, store, req, done, nextSpy;

@@ -2,10 +2,10 @@ var MemcachedMock = require('../mock/MemcachedMock'),
     proxyquire = require('proxyquire').noCallThru();
 var MemcachedStore = proxyquire('../lib/MemcachedStore', {'memcached': MemcachedMock});
 
-describe("Express brute memory store", function () {
+describe("Express brute memcached store", function () {
 	var instance, callback, store;
 	beforeEach(function () {
-		instance = new MemcachedStore([], {prefix: 'test', lifetime: 0});
+		instance = new MemcachedStore([], {prefix: 'test'});
 		callback = jasmine.createSpy();
 	});
 
@@ -17,7 +17,7 @@ describe("Express brute memory store", function () {
 		var curDate = new Date(),
 		    object = {count: 1, lastRequest: curDate};
 		runs(function () {
-			instance.set("1.2.3.4", object, callback);
+			instance.set("1.2.3.4", object, 0, callback);
 		});
 
 		waitsFor(function () { return callback.calls.length == 1; });
@@ -39,7 +39,7 @@ describe("Express brute memory store", function () {
 		var curDate = new Date(),
 		    object = {count: 1, lastRequest: curDate};
 		runs(function () {
-			instance.set("1.2.3.4", object, callback);
+			instance.set("1.2.3.4", object, 0, callback);
 		});
 
 		waitsFor(function () { return callback.calls.length == 1; });
@@ -47,7 +47,7 @@ describe("Express brute memory store", function () {
 		runs(function () {
 			expect(callback).toHaveBeenCalledWith(null);
 
-			instance.increment("1.2.3.4", callback);
+			instance.increment("1.2.3.4", 0, callback);
 		});
 
 		waitsFor(function () { return callback.calls.length == 2; });
@@ -68,7 +68,7 @@ describe("Express brute memory store", function () {
 	});
 	it("can increment even if no value was set", function () {
 		runs(function () {
-			instance.increment("1.2.3.4", callback);
+			instance.increment("1.2.3.4", 0, callback);
 		});
 
 		waitsFor(function () { return callback.calls.length == 1; });
@@ -104,7 +104,7 @@ describe("Express brute memory store", function () {
 		var curDate = new Date(),
 		    object = {count: 1, lastRequest: curDate};
 		runs(function () {
-			instance.set("1.2.3.4", object, callback);
+			instance.set("1.2.3.4", object, 0, callback);
 		});
 
 		waitsFor(function () { return callback.calls.length == 1; });
@@ -143,10 +143,8 @@ describe("Express brute memory store", function () {
 		var curDate = new Date(),
 		    object = {count: 1, lastRequest: curDate};
 
-		var instance = new MemcachedStore([], {prefix: 'test', lifetime: 1});
-
 		runs(function () {
-			instance.set("1.2.3.4", object, callback);
+			instance.set("1.2.3.4", object, 1, callback);
 		});
 
 		waitsFor(function () { return callback.calls.length == 1; });

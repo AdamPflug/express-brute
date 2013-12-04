@@ -22,6 +22,9 @@ MemcachedMock.prototype.get = function (key, callback) {
 	typeof callback == 'function' && callback(null, this.data[key]);
 };
 MemcachedMock.prototype.del = function (key, callback) {
+	if (this.data[key] && this.data[key].timeout) {
+		clearTimeout(this.data[key].timeout);
+	}
 	delete this.data[key];
 	typeof callback == 'function' && callback(null);
 };

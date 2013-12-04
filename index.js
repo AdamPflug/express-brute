@@ -22,6 +22,12 @@ var ExpressBrute = module.exports = function (store, options) {
 		this.delays.push(nextNum);
 	}
 	this.delays[this.delays.length-1] = this.options.maxWait;
+
+	// set default lifetime
+	if (typeof this.options.lifetime == "undefined") {
+		this.options.lifetime = (this.options.maxWait/1000)*(this.delays.length);
+		this.options.lifetime = Math.ceil(this.options.lifetime);
+	}
 };
 ExpressBrute.prototype.prevent = function (req, res, next) {
 	req.brute = this; // store a reference to this so it's easier to reset the counter from routes
@@ -41,7 +47,7 @@ ExpressBrute.prototype.prevent = function (req, res, next) {
 		var nextValidRequestTime = lastValidRequestTime+this.delays[delayIndex];
 			
 		if (count < 1 || nextValidRequestTime < this.now()) {
-			this.store.set(req.connection.remoteAddress, {count: count+1, lastRequest: new Date(this.now())}, function (err) {
+			this.store.set(req.connection.remoteAddress, {count: count+1, lastRequest: new Date(this.now())}, this.options.lifetime || 0, function (err) {
 				if (err) {
 					throw "Cannot increment request count";
 				}
