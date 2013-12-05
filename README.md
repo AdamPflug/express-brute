@@ -127,9 +127,11 @@ Changelog
 ---------
 ### v0.3.0
 * NEW: Support for using custom keys to group requests further (e.g. grouping login requests by username)
-* NEW: Support for middleware from multiple instances of `BruteForce` on the same route.
+* NEW: Support for middleware from multiple instances of `ExpressBrute` on the same route.
 * NEW: Tracking `lifetime` now has a reasonable default derived from the other settings for that instance of `ExpressBrute`
 * NEW: Keys are now hashed before saving to a store, to prevent really long key names and reduce the possibility of collisions.
+* NEW: There is now a convience method that gets attached to `req` object as `req.brute.reset`. It takes a single parameter (a callback), and will reset all the counters used by `ExpressBrute` middleware that was called for the current route.
 * CHANGED: Tracking `lifetime` is now specified on `ExpressBrute` instead of `MemcachedStore`. This also means lifetime is now supported by MemoryStore.
+* CHANGED: The function signature for `ExpressBrute.reset` has changed. It now requires an IP and key be passed instead of a request object.
 * IMPROVED: Efficiency for large values of `freeRetries`.
 * BUG: Removed a small chance of incorrectly triggering brute force protection.
