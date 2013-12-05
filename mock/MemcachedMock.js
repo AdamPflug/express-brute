@@ -2,6 +2,7 @@ var _ = require('underscore');
 
 var MemcachedMock = module.exports = function () {
 	this.data = {};
+	_.bindAll(this, 'set', 'get', 'del');
 };
 MemcachedMock.prototype.set = function (key, value, lifetime, callback) {
 	if (!this.data[key]) {

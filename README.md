@@ -50,16 +50,75 @@ For details see [node-memcached](http://github.com/3rd-Eden/node-memcached).
 Instance Methods
 ----------------
 - `protect(req, res, next)` Middleware that will bounce requests that happen faster than
-                            the current wait time by calling `failCallback`
-- `reset(req, callback)`    Resets the wait time between requests back to its initial value.
-                            For example, if you are protecting a login route you probably want to 
-                            call this on successful login, otherwise other users trying to log in 
-                            from that ip will experience more aggressive request throttling than 
-                            they should.
+                            the current wait time by calling `failCallback`. Equivilent to `getMiddleware(null)`
+- `getMiddleware(key)`      Generates middleware that will bounce requests with the same `key` and IP address
+                            that happen faster than the current wait time by calling `failCallback`.
+                            `key` can be a string. Alternatively, key can be a `function(req, res, next)`
+                            that returns a string or calls `next`, passing a string as the first parameter.
+                            Also attaches a function at `req.brute.reset` that can be called to reset the
+                            counter for the current ip and key. This functions the the `reset` instance method,
+                            but without the need to explicitly pass the `ip` and `key` paramters
+- `reset(ip, key, next)`    Resets the wait time between requests back to its initial value. You can pass `null`
+                            for `key` if you want to reset a request protected by `protect`.
 
-
-Built-in failure callbacks
+Built-in Failure Callbacks
 ---------------------------
 There are some built-in callbacks that come with BruteExpress that handle some common use cases.
 		- `ExpressBrute.FailForbidden` Terminates the request and responds with a 403 and json error message
 		- `ExpressBrute.FailMark` Sets res.nextValidRequestDate and the res.status=403, then calls next() to pass the request on to the appropriate routes
+
+A More Complex Example
+----------------------
+``` js
+require('connect-flash');
+var ExpressBrute = require('express-brute'),
+	moment = require('moment'),
+    store;
+
+if (config.environment == 'development'){
+	store = new ExpressBrute.MemoryStore(); // stores state locally, don't use this in production
+} else {
+	// stores state with memcached
+	store = new ExpressBrute.MemcachedStore(['127.0.0.1'], {
+		prefix: 'NoConflicts'
+	});
+}
+
+var failCallback = function (req, res, next, nextValidRequestDate) {
+	req.flash('error', "You've made too many failed attempts in a short period of time, please try again "+moment(nextValidRequestDate).fromNow());
+	res.redirect('/login'); // brute force protection triggered, send them back to the login page
+};
+var userBruteforce = new ExpressBrute(store, {
+	freeRetries: 5,
+	winWait: 5*60*1000, // 5 minutes
+	maxWait: 60*60*1000, // 1 hour,
+	failCallback: failCallback
+});
+// No more than 1000 login attempts per day per IP
+var globalBruteforce = new ExpressBrute(store, {
+	freeRetries: 1000,
+	winWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
+	maxWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
+	lifetime: 24*60*60*1000, // 1 day
+	failCallback: failCallback
+});
+
+app.post('/auth',
+	globalBruteforce.prevent,
+	userBruteforce.getMiddleware(function(req, res, next) {
+		// prevent too many attempts for the same username
+		return req.body.username;
+	}),
+	function (req, res, next) {
+		if (User.isValidLogin(req.body.username, req.body.password)) { // omitted for the sake of conciseness
+		 	// reset the failure counter so next time they log in they get 5 tries again before the delays kick in
+			req.brute.reset(function () {
+				res.redirect('/'); // logged in, send them to the home page
+			});
+		} else {
+			res.flash('error', "Invalid username or password")
+			res.redirect('/login'); // bad username/password, send them back to the login page
+		}
+	}
+);
+```
