@@ -122,3 +122,14 @@ app.post('/auth',
 	}
 );
 ```
+
+Changelog
+---------
+### v0.3.0
+* NEW: Support for using custom keys to group requests further (e.g. grouping login requests by username)
+* NEW: Support for middleware from multiple instances of `BruteForce` on the same route.
+* NEW: Tracking `lifetime` now has a reasonable default derived from the other settings for that instance of `ExpressBrute`
+* NEW: Keys are now hashed before saving to a store, to prevent really long key names and reduce the possibility of collisions.
+* CHANGED: Tracking `lifetime` is now specified on `ExpressBrute` instead of `MemcachedStore`. This also means lifetime is now supported by MemoryStore.
+* IMPROVED: Efficiency for large values of `freeRetries`.
+* BUG: Removed a small chance of incorrectly triggering brute force protection.
