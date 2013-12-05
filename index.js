@@ -20,16 +20,12 @@ var ExpressBrute = module.exports = function (store, options) {
 	// set options
 	this.options = _.extend({}, ExpressBrute.defaults, options);
 	if (this.options.minWait < 1) {
-		this.options.minWait++;
+		this.options.minWait = 1;
 	}
 	this.store = store;
 
 	// build delays array
-	this.delays = [];
-	for (i = 0; i < this.options.freeRetries; i++) {
-		this.delays[i] = 0;
-	}
-	this.delays.push(this.options.minWait);
+	this.delays = [this.options.minWait];
 	while(this.delays[this.delays.length-1] < this.options.maxWait) {
 		var nextNum = this.delays[this.delays.length-1] + (this.delays.length > 1 ? this.delays[this.delays.length-2] : 0);
 		this.delays.push(nextNum);
@@ -38,7 +34,7 @@ var ExpressBrute = module.exports = function (store, options) {
 
 	// set default lifetime
 	if (typeof this.options.lifetime == "undefined") {
-		this.options.lifetime = (this.options.maxWait/1000)*(this.delays.length);
+		this.options.lifetime = (this.options.maxWait/1000)*(this.delays.length + this.options.freeRetries);
 		this.options.lifetime = Math.ceil(this.options.lifetime);
 	}
 
@@ -82,16 +78,24 @@ ExpressBrute.prototype.getMiddleware = function (key) {
 				}
 
 				var count = 0,
-					delayIndex = 0,
+					delay = 0,
 					lastValidRequestTime = this.now();
 				if (value) {
 					count = value.count;
-					delayIndex = (count < this.delays.length ? count : this.delays.length) - 1;
 					lastValidRequestTime = value.lastRequest.getTime();
+
+					var delayIndex = value.count - this.options.freeRetries - 1;
+					if (delayIndex >= 0) {
+						if (delayIndex < this.delays.length) {
+							delay = this.delays[delayIndex];
+						} else {
+							delay = this.options.maxWait;
+						}
+					}
 				}
-				var nextValidRequestTime = lastValidRequestTime+this.delays[delayIndex];
+				var nextValidRequestTime = lastValidRequestTime+delay;
 					
-				if (count < 1 || nextValidRequestTime <= this.now()) {
+				if (nextValidRequestTime <= this.now()) {
 					this.store.set(key, {count: count+1, lastRequest: new Date(this.now())}, this.options.lifetime || 0, function (err) {
 						if (err) {
 							throw "Cannot increment request count";

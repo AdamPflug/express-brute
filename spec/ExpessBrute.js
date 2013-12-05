@@ -29,17 +29,21 @@ describe("express brute", function () {
 				failCallback: errorSpy
 			});
 		});
-		it('correctly calculates delays when there are no free requests', function () {
+		it('correctly calculates delays', function () {
 			expect(brute.delays).toEqual([10,10,20,30,50,80,100]);
 		});
-		it('correctly calculates delays when there are free requests', function () {
+		it('respects free retries', function () {
 			brute = new ExpressBrute(store, {
 				freeRetries: 1,
 				minWait: 10,
 				maxWait: 100,
 				failCallback: errorSpy
 			});
-			expect(brute.delays).toEqual([0,10,10,20,30,50,80,100]);
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			expect(errorSpy).not.toHaveBeenCalled();
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			expect(errorSpy).toHaveBeenCalled();
 		});
 		it('correctly calculates delays when min and max wait are the same', function () {
 			brute = new ExpressBrute(store, {
