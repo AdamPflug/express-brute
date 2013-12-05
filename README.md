@@ -138,6 +138,13 @@ app.post('/auth',
 
 Changelog
 ---------
+### v0.4.0
+* NEW: `attachResetToRequest` parameter that lets you prevent the request object being decorated
+* NEW: `failCallback` can be overriden by `getMiddleware`
+* NEW: `proxyDepth` option on `ExpressBrute` that specifies how many levels of the `X-Forwarded-For` header to trust (inspired by [express-bouncer](https://github.com/dkrutsko/express-bouncer/)).
+* NEW: `getIPFromRequest` method that essentially allows `reset` to used in a similar ways as in v0.2.2. This also respects the new `proxyDepth` setting.
+* CHANGED: `getMiddleware` now takes an options object instead of the key directly.
+
 ### v0.3.0
 * NEW: Support for using custom keys to group requests further (e.g. grouping login requests by username)
 * NEW: Support for middleware from multiple instances of `ExpressBrute` on the same route.
