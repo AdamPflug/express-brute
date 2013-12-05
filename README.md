@@ -59,13 +59,14 @@ For details see [node-memcached](http://github.com/3rd-Eden/node-memcached).
 -------------------------------
 - `prevent(req, res, next)` Middleware that will bounce requests that happen faster than
                             the current wait time by calling `failCallback`. Equivilent to `getMiddleware(null)`
-- `getMiddleware(key)`      Generates middleware that will bounce requests with the same `key` and IP address
+- `getMiddleware(options)`  Generates middleware that will bounce requests with the same `key` and IP address
                             that happen faster than the current wait time by calling `failCallback`.
-                            `key` can be a string. Alternatively, key can be a `function(req, res, next)`
-                            that returns a string or calls `next`, passing a string as the first parameter.
                             Also attaches a function at `req.brute.reset` that can be called to reset the
                             counter for the current ip and key. This functions the the `reset` instance method,
                             but without the need to explicitly pass the `ip` and `key` paramters
+	- `key`           can be a string or alternatively it can be a `function(req, res, next)`
+	                  that or calls `next`, passing a string as the first parameter.
+	- `failCallback`  Allows you to override the value of `failCallback` for this middleware
 - `reset(ip, key, next)`    Resets the wait time between requests back to its initial value. You can pass `null`
                             for `key` if you want to reset a request protected by `protect`.
 - `getIPFromRequest(req)`   Uses the current proxy trust settings to get the current IP from a request object
@@ -118,9 +119,11 @@ var globalBruteforce = new ExpressBrute(store, {
 
 app.post('/auth',
 	globalBruteforce.prevent,
-	userBruteforce.getMiddleware(function(req, res, next) {
-		// prevent too many attempts for the same username
-		return req.body.username;
+	userBruteforce.getMiddleware({
+		key: function(req, res, next) {
+			// prevent too many attempts for the same username
+			return req.body.username;
+		}
 	}),
 	function (req, res, next) {
 		if (User.isValidLogin(req.body.username, req.body.password)) { // omitted for the sake of conciseness
