@@ -74,8 +74,8 @@ For details see [node-memcached](http://github.com/3rd-Eden/node-memcached).
 Built-in Failure Callbacks
 ---------------------------
 There are some built-in callbacks that come with BruteExpress that handle some common use cases.
-		- `ExpressBrute.FailForbidden` Terminates the request and responds with a 403 and json error message
-		- `ExpressBrute.FailMark` Sets res.nextValidRequestDate and the res.status=403, then calls next() to pass the request on to the appropriate routes
+- `ExpressBrute.FailForbidden` Terminates the request and responds with a 403 and json error message
+- `ExpressBrute.FailMark` Sets res.nextValidRequestDate and the res.status=403, then calls next() to pass the request on to the appropriate routes
 
 A More Complex Example
 ----------------------
