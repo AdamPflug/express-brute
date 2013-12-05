@@ -3,7 +3,7 @@ express-brute
 [![Build Status](https://travis-ci.org/AdamPflug/express-brute.png?branch=master)](https://travis-ci.org/AdamPflug/express-brute)
 [![NPM version](https://badge.fury.io/js/express-brute.png)](http://badge.fury.io/js/express-brute)
 
-A brute-force protection middleware for express routes that rate limits incoming requests, increaseing the delay with each request in a fibonacci-like sequence.
+A brute-force protection middleware for express routes that rate-limits incoming requests, increaseing the delay with each request in a fibonacci-like sequence.
 
 Installation
 ------------
@@ -27,7 +27,7 @@ app.post('/auth',
 );
 ```
 
-Options
+Classes
 -------
 ### ExpressBrute(store, options)
 - `store` An instance of `ExpressBrute.MemoryStore` or `ExpressBrute.MemcachedStore`
@@ -37,19 +37,26 @@ Options
 	- `maxWait`      The maximum amount of time (in milliseconds) between requests the user needs to wait (default: 15 minutes). The wait for a given request is determined by adding the time the user needed to wait for the previous two requests.
 	- `lifetime`     The length of time (in seconds since the last request) to remember the number of requests that have been made by an IP. By default it will be set to `maxWait * the number of attempts before you hit maxWait` to discourage simply waiting for the lifetime to expire before resuming an attack. With default values this is about 6 hours.
 	- `failCallback` gets called with (`req`, `resp`, `next`, `nextValidRequestDate`) when a request is rejected (default: ExpressBrute.FailForbidden)
+	- `proxyDepth`   Specifies how many levels of the `X-Forwarded-For` header to trust. If your web server is behind a CDN and/or load balancer you'll need to set this to however many levels of proxying it's behind to get a valid IP. Setting this too high allows attackers to get around brute force protection by spoofing the `X-Forwarded-For` header, so don't set it higher than you need to (default: 0)
+
+### ExpressBrute.MemoryStore()
+An in-memory store for persisting request counts. Don't use this in production.
 
 ### ExpressBrute.MemcachedStore(hosts, options)
+A memcached store for persisting request counts.
 - `hosts` Memcached servers locations, can by string, array, or hash.
 - `options`
 	- `prefix`       An optional prefix for each memcache key, in case you are sharing 
 	                 your memcached servers with something generating its own keys.
 	- ...            The rest of the options will be passed directly to the node-memcached constructor.
 
+
+
 For details see [node-memcached](http://github.com/3rd-Eden/node-memcached).
 
-Instance Methods
-----------------
-- `protect(req, res, next)` Middleware that will bounce requests that happen faster than
+`ExpressBrute` Instance Methods
+-------------------------------
+- `prevent(req, res, next)` Middleware that will bounce requests that happen faster than
                             the current wait time by calling `failCallback`. Equivilent to `getMiddleware(null)`
 - `getMiddleware(key)`      Generates middleware that will bounce requests with the same `key` and IP address
                             that happen faster than the current wait time by calling `failCallback`.
@@ -60,6 +67,7 @@ Instance Methods
                             but without the need to explicitly pass the `ip` and `key` paramters
 - `reset(ip, key, next)`    Resets the wait time between requests back to its initial value. You can pass `null`
                             for `key` if you want to reset a request protected by `protect`.
+- `getIPFromRequest(req)`   Uses the current proxy trust settings to get the current IP from a request object
 
 Built-in Failure Callbacks
 ---------------------------
@@ -88,8 +96,10 @@ var failCallback = function (req, res, next, nextValidRequestDate) {
 	req.flash('error', "You've made too many failed attempts in a short period of time, please try again "+moment(nextValidRequestDate).fromNow());
 	res.redirect('/login'); // brute force protection triggered, send them back to the login page
 };
+// Start slowing requests after 5 failed attempts to do something for the same user
 var userBruteforce = new ExpressBrute(store, {
 	freeRetries: 5,
+	proxyDepth: 1,
 	winWait: 5*60*1000, // 5 minutes
 	maxWait: 60*60*1000, // 1 hour,
 	failCallback: failCallback
@@ -97,6 +107,7 @@ var userBruteforce = new ExpressBrute(store, {
 // No more than 1000 login attempts per day per IP
 var globalBruteforce = new ExpressBrute(store, {
 	freeRetries: 1000,
+	proxyDepth: 1,
 	winWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
 	maxWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
 	lifetime: 24*60*60*1000, // 1 day

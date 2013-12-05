@@ -237,6 +237,59 @@ describe("express brute", function () {
 			expect(nextSpy.calls.length).toEqual(2);
 		});
 	});
+	describe('proxy severs', function () {
+		var brute, store, errorSpy, nextSpy, req, req2;
+		beforeEach(function () {
+			store = new ExpressBrute.MemoryStore();
+			errorSpy = jasmine.createSpy("errorSpy");
+			nextSpy = jasmine.createSpy();
+			req = function () {
+				return {
+					connection: {
+						remoteAddress: '1.2.3.4'
+					},
+					get: function () {
+						return '4.5.6.7, 3.4.5.6, 2.3.4.5, 1.2.3.4';
+					}
+				};
+			};
+			req2 = function () {
+				return {
+					connection: {
+						remoteAddress: '1.2.3.4'
+					},
+					get: function () {
+						return;
+					}
+				};
+			};
+			brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: 100,
+				maxWait: 1000,
+				failCallback: errorSpy,
+				lifetime: 0
+			});
+		});
+		it ('gets the the right IP with when there is no x-forwared-for', function () {
+			expect(brute.getIPFromRequest(req2())).toEqual('1.2.3.4');
+		});
+		it ('gets the the right IP with when there is no x-forwared-for and proxyDepth > 0', function () {
+			brute.options.proxyDepth = 1;
+			expect(brute.getIPFromRequest(req2())).toEqual('1.2.3.4');
+		});
+		it ('gets the the right IP with when proxyDepth is 0', function () {
+			expect(brute.getIPFromRequest(req())).toEqual('1.2.3.4');
+		});
+		it ('gets the the right IP with when proxyDepth is greater than 0', function () {
+			brute.options.proxyDepth = 1;
+			expect(brute.getIPFromRequest(req())).toEqual('2.3.4.5');
+		});
+		it ('gets the the right IP with when proxyDepth is greater than the x-forwared-for length', function () {
+			brute.options.proxyDepth = 10;
+			expect(brute.getIPFromRequest(req())).toEqual('4.5.6.7');
+		});
+	});
 	describe("multiple brute instances", function () {
 		var brute, brute2, store, errorSpy, errorSpy2, nextSpy, req;
 		beforeEach(function () {

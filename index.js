@@ -51,7 +51,7 @@ ExpressBrute.prototype.getMiddleware = function (key) {
 	// create middleware
 	return _.bind(function (req, res, next) {
 		keyFunc(req, res, _.bind(function (key) {
-			key = getKey([req.connection.remoteAddress, this.name, key]);
+			key = getKey([this.getIPFromRequest(req), this.name, key]);
 
 			// attach a simpler "reset" functio to req.brute.reset
 			var reset = _.bind(function (callback) {
@@ -116,6 +116,17 @@ ExpressBrute.prototype.reset = function (ip, key, callback) {
 ExpressBrute.prototype.now = function () {
 	return Date.now();
 };
+ExpressBrute.prototype.getIPFromRequest = function (req) {
+	if (this.options.proxyDepth && this.options.proxyDepth > 0 && req.get('X-Forwarded-For')) {
+		var ips = req.get('X-Forwarded-For').split(/ *, */);
+		if (this.options.proxyDepth < ips.length) {
+			return ips[ips.length - this.options.proxyDepth - 1];
+		} else if (ips.length > 1) {
+			return ips[0];
+		}
+	}
+	return req.connection.remoteAddress;
+};
 
 ExpressBrute.FailForbidden = function (req, res, next, nextValidRequestDate) {
 	res.send(403, {error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
@@ -129,6 +140,7 @@ ExpressBrute.MemoryStore = require('./lib/MemoryStore');
 ExpressBrute.MemcachedStore = require('./lib/MemcachedStore');
 ExpressBrute.defaults = {
 	freeRetries: 2,
+	proxyDepth: 0,
 	minWait: 500,
 	maxWait: 1000*60*15, // 15 minutes
 	failCallback: ExpressBrute.FailForbidden
