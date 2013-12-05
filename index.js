@@ -41,12 +41,16 @@ var ExpressBrute = module.exports = function (store, options) {
 	// generate "prevent" middleware
 	this.prevent = this.getMiddleware();
 };
-ExpressBrute.prototype.getMiddleware = function (key) {
+ExpressBrute.prototype.getMiddleware = function (options) {
 	// standardize input
-	var keyFunc = key;
+	options = _.extend({}, options);
+	var keyFunc = options.key;
 	if (typeof keyFunc !== 'function') {
-		keyFunc = function (req, res, next) { next(key); };
+		keyFunc = function (req, res, next) { next(options.key); };
 	}
+	var getFailCallback = _.bind(function () {
+		return typeof options.failCallback === 'undefined' ? this.options.failCallback : options.failCallback;
+	}, this);
 
 	// create middleware
 	return _.bind(function (req, res, next) {
@@ -106,7 +110,8 @@ ExpressBrute.prototype.getMiddleware = function (key) {
 						typeof next == 'function' && next();
 					});
 				} else {
-					this.options.failCallback(req, res, next, new Date(nextValidRequestTime));
+					var failCallback = getFailCallback();
+					typeof failCallback === 'function' && failCallback(req, res, next, new Date(nextValidRequestTime));
 				}
 			}, this));
 		},this));

@@ -170,6 +170,26 @@ describe("express brute", function () {
 				expect(errorSpy.calls.length).toEqual(1);
 			});
 		});
+		it('allows failCallback to be overridden', function () {
+			brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: 10000,
+				maxWait: 10000,
+				lifetime: 1,
+				failCallback: errorSpy
+			});
+			var errorSpy2 = jasmine.createSpy();
+			var mid = brute.getMiddleware({
+				failCallback: errorSpy2
+			});
+
+			mid(req(), new ResponseMock(), nextSpy);
+			expect(errorSpy).not.toHaveBeenCalled();
+			expect(errorSpy2).not.toHaveBeenCalled();
+			mid(req(), new ResponseMock(), nextSpy);
+			expect(errorSpy).not.toHaveBeenCalled();
+			expect(errorSpy2).toHaveBeenCalled();
+		});
 	});
 	describe("multiple keys", function () {
 		var brute, store, errorSpy, nextSpy, req, done;
@@ -186,8 +206,8 @@ describe("express brute", function () {
 			});
 		});
 		it ('tracks keys separately', function () {
-			var first = brute.getMiddleware('first');
-			var second = brute.getMiddleware('second');
+			var first = brute.getMiddleware({key: 'first' });
+			var second = brute.getMiddleware({key: 'second' });
 
 			first(req(), new ResponseMock(), nextSpy);
 			expect(nextSpy.calls.length).toEqual(1);
@@ -208,8 +228,8 @@ describe("express brute", function () {
 					someData: "something cool"
 				};
 			};
-			var first = brute.getMiddleware(function(req, res, next) { next(req.someData); });
-			var second = brute.getMiddleware("something cool");
+			var first = brute.getMiddleware({key: function(req, res, next) { next(req.someData); } });
+			var second = brute.getMiddleware({key: "something cool" });
 
 			first(req(), new ResponseMock(), nextSpy);
 			expect(nextSpy.calls.length).toEqual(1);
@@ -219,7 +239,7 @@ describe("express brute", function () {
 			expect(nextSpy.calls.length).toEqual(1);
 		});
 		it ('supports brute.reset', function () {
-			var mid = brute.getMiddleware('withAKey');
+			var mid = brute.getMiddleware({key: 'withAKey' });
 
 			mid(req(), new ResponseMock(), nextSpy);
 			expect(nextSpy.calls.length).toEqual(1);
@@ -228,7 +248,7 @@ describe("express brute", function () {
 			expect(nextSpy.calls.length).toEqual(2);
 		});
 		it ('supports req.reset shortcut', function () {
-			var firstReq, mid = brute.getMiddleware('withAKey');
+			var firstReq, mid = brute.getMiddleware({key: 'withAKey' });
 
 			mid(firstReq = req(), new ResponseMock(), nextSpy);
 			expect(nextSpy.calls.length).toEqual(1);
