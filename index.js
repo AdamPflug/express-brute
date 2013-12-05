@@ -53,23 +53,26 @@ ExpressBrute.prototype.getMiddleware = function (key) {
 		keyFunc(req, res, _.bind(function (key) {
 			key = getKey([this.getIPFromRequest(req), this.name, key]);
 
-			// attach a simpler "reset" functio to req.brute.reset
-			var reset = _.bind(function (callback) {
-				this.store.reset(key, callback);
-			}, this);
-			if (req.brute && req.brute.reset) {
-				// wrap existing reset if one exists
-				var oldReset = req.brute.reset;
-				var newReset = reset;
-				reset = function (callback) {
-					oldReset(function () {
-						newReset(callback);
-					});
+			// attach a simpler "reset" function to req.brute.reset
+			if (this.options.attachResetToRequest) {
+				var reset = _.bind(function (callback) {
+					this.store.reset(key, callback);
+				}, this);
+				if (req.brute && req.brute.reset) {
+					// wrap existing reset if one exists
+					var oldReset = req.brute.reset;
+					var newReset = reset;
+					reset = function (callback) {
+						oldReset(function () {
+							newReset(callback);
+						});
+					};
+				}
+				req.brute = {
+					reset: reset
 				};
 			}
-			req.brute = {
-				reset: reset
-			};
+			
 
 			// filter request
 			this.store.get(key, _.bind(function (err, value) {
@@ -141,6 +144,7 @@ ExpressBrute.MemcachedStore = require('./lib/MemcachedStore');
 ExpressBrute.defaults = {
 	freeRetries: 2,
 	proxyDepth: 0,
+	attachResetToRequest: true,
 	minWait: 500,
 	maxWait: 1000*60*15, // 15 minutes
 	failCallback: ExpressBrute.FailForbidden

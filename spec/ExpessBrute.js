@@ -236,6 +236,14 @@ describe("express brute", function () {
 			mid(req(), new ResponseMock(), nextSpy);
 			expect(nextSpy.calls.length).toEqual(2);
 		});
+		it ('respects the attachResetToRequest', function () {
+			brute.options.attachResetToRequest = false;
+			var firstReq;
+
+			brute.prevent(firstReq = req(), new ResponseMock(), nextSpy);
+			expect(nextSpy.calls.length).toEqual(1);
+			expect(firstReq.brute).toBeUndefined();
+		});
 	});
 	describe('proxy severs', function () {
 		var brute, store, errorSpy, nextSpy, req, req2;
@@ -358,6 +366,36 @@ describe("express brute", function () {
 				brute.prevent(failReq, new ResponseMock(), successSpy);
 				brute2.prevent(failReq, new ResponseMock(), successSpy);
 				expect(successSpy.calls.length).toEqual(2);
+			});
+
+		});
+		it ('resets only one brute instance when the req.reset shortcut is called but attachResetToRequest is false on one', function () {
+			brute2 = new ExpressBrute(store, {
+				freeRetries: 1,
+				minWait: 100,
+				maxWait: 1000,
+				failCallback: errorSpy2,
+				lifetime: 0,
+				attachResetToRequest: false
+			});
+
+			var failReq = req();
+			var successSpy = jasmine.createSpy("success spy");
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			brute2.prevent(req(), new ResponseMock(), nextSpy);
+			brute2.prevent(req(), new ResponseMock(), nextSpy);
+			expect(errorSpy).not.toHaveBeenCalled();
+			expect(errorSpy2).not.toHaveBeenCalled();
+
+			brute.prevent(failReq, new ResponseMock(), nextSpy);
+			brute2.prevent(failReq, new ResponseMock(), nextSpy);
+			expect(errorSpy).toHaveBeenCalled();
+			expect(errorSpy2).toHaveBeenCalled();
+
+			failReq.brute.reset(function () {
+				brute.prevent(failReq, new ResponseMock(), successSpy);
+				brute2.prevent(failReq, new ResponseMock(), successSpy);
+				expect(successSpy.calls.length).toEqual(1);
 			});
 
 		});
