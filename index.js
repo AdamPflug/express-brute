@@ -86,10 +86,12 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 
 				var count = 0,
 					delay = 0,
-					lastValidRequestTime = this.now();
+					lastValidRequestTime = this.now(),
+					firstRequestTime = lastValidRequestTime;
 				if (value) {
 					count = value.count;
 					lastValidRequestTime = value.lastRequest.getTime();
+					firstRequestTime = value.firstRequest.getTime();
 
 					var delayIndex = value.count - this.options.freeRetries - 1;
 					if (delayIndex >= 0) {
@@ -100,10 +102,26 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 						}
 					}
 				}
-				var nextValidRequestTime = lastValidRequestTime+delay;
-					
+				var nextValidRequestTime = lastValidRequestTime+delay,
+					remainingLifetime = this.options.lifetime || 0;
+
+				if (!this.options.refreshTimeoutOnRequest && remainingLifetime > 0) {
+					remainingLifetime = remainingLifetime - Math.floor((this.now() - firstRequestTime) / 1000);
+					if (remainingLifetime < 1) {
+						// it should be expired alredy, treat this as a new request and reset everything
+						count = 0;
+						delay = 0;
+						nextValidRequestTime = firstRequestTime = lastValidRequestTime = this.now();
+						remainingLifetime = this.options.lifetime || 0;
+					}
+				}
+
 				if (nextValidRequestTime <= this.now()) {
-					this.store.set(key, {count: count+1, lastRequest: new Date(this.now())}, this.options.lifetime || 0, function (err) {
+					this.store.set(key, {
+						count: count+1,
+						lastRequest: new Date(this.now()),
+						firstRequest: new Date(firstRequestTime)
+					}, remainingLifetime, function (err) {
 						if (err) {
 							throw "Cannot increment request count";
 						}
@@ -150,6 +168,7 @@ ExpressBrute.defaults = {
 	freeRetries: 2,
 	proxyDepth: 0,
 	attachResetToRequest: true,
+	refreshTimeoutOnRequest: true,
 	minWait: 500,
 	maxWait: 1000*60*15, // 15 minutes
 	failCallback: ExpressBrute.FailForbidden

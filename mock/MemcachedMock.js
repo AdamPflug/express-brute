@@ -10,7 +10,7 @@ MemcachedMock.prototype.set = function (key, value, lifetime, callback) {
 	} else if (this.data[key].timeout) {
 		clearTimeout(this.data[key].timeout);
 	}
-	this.data[key] = value;
+	this.data[key].value = value;
 
 	if (lifetime) {
 		this.data[key].timeout = setTimeout(_.bind(function () {
@@ -20,7 +20,7 @@ MemcachedMock.prototype.set = function (key, value, lifetime, callback) {
 	typeof callback == 'function' && callback(null);
 };
 MemcachedMock.prototype.get = function (key, callback) {
-	typeof callback == 'function' && callback(null, this.data[key]);
+	typeof callback == 'function' && callback(null, this.data[key] && this.data[key].value);
 };
 MemcachedMock.prototype.del = function (key, callback) {
 	if (this.data[key] && this.data[key].timeout) {
