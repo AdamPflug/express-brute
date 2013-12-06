@@ -143,6 +143,9 @@ app.post('/auth',
 
 Changelog
 ---------
+### v0.4.2
+* BUG: In some cases when no callbacks were supplied memcached would drop the request. Ensure that memcached always sees a callback expressBrute isn't given one.
+
 ### v0.4.1
 * NEW: `refreshTimeoutOnRequest` option that allows you to prevent the remaining `lifetime` for a timer from being reset on each request (useful for implementing limits for set time frames, e.g. requests per day)
 * BUG: Lifetimes were not previously getting extended properly for instances of `ExpressBrute.MemoryStore`
