@@ -124,7 +124,7 @@ app.post('/auth',
 	userBruteforce.getMiddleware({
 		key: function(req, res, next) {
 			// prevent too many attempts for the same username
-			return req.body.username;
+			next(req.body.username);
 		}
 	}),
 	function (req, res, next) {
