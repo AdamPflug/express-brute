@@ -48,7 +48,7 @@ An in-memory store for persisting request counts. Don't use this in production.
 A memcached store for persisting request counts.
 - `hosts` Memcached servers locations, can by string, array, or hash.
 - `options`
-	- `prefix`       An optional prefix for each memcache key, in case you are sharing 
+	- `prefix`       An optional prefix for each memcache key, in case you are sharing
 	                 your memcached servers with something generating its own keys.
 	- ...            The rest of the options will be passed directly to the node-memcached constructor.
 
@@ -103,7 +103,7 @@ var failCallback = function (req, res, next, nextValidRequestDate) {
 var userBruteforce = new ExpressBrute(store, {
 	freeRetries: 5,
 	proxyDepth: 1,
-	winWait: 5*60*1000, // 5 minutes
+	minWait: 5*60*1000, // 5 minutes
 	maxWait: 60*60*1000, // 1 hour,
 	failCallback: failCallback
 });
@@ -113,7 +113,7 @@ var globalBruteforce = new ExpressBrute(store, {
 	proxyDepth: 1,
 	attachResetToRequest: false,
 	refreshTimeoutOnRequest: false,
-	winWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
+	minWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
 	maxWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
 	lifetime: 24*60*60*1000, // 1 day
 	failCallback: failCallback
