@@ -115,7 +115,7 @@ var globalBruteforce = new ExpressBrute(store, {
 	refreshTimeoutOnRequest: false,
 	minWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
 	maxWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
-	lifetime: 24*60*60*1000, // 1 day
+	lifetime: 24*60*60, // 1 day (seconds not milliseconds)
 	failCallback: failCallback
 });
 
