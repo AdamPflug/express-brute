@@ -76,7 +76,7 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 					reset: reset
 				};
 			}
-			
+
 
 			// filter request
 			this.store.get(key, _.bind(function (err, value) {
@@ -129,7 +129,7 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 					});
 				} else {
 					var failCallback = getFailCallback();
-					typeof failCallback === 'function' && failCallback(req, res, next, new Date(nextValidRequestTime));
+					typeof failCallback === 'function' && failCallback(req, res, next, new Date(nextValidRequestTime), nextValidRequestTime);
 				}
 			}, this));
 		},this));
@@ -154,12 +154,14 @@ ExpressBrute.prototype.getIPFromRequest = function (req) {
 	return req.connection.remoteAddress;
 };
 
-ExpressBrute.FailForbidden = function (req, res, next, nextValidRequestDate) {
+ExpressBrute.FailForbidden = function (req, res, next, nextValidRequestDate, nextValidRequestTime) {
+	res.header('Retry-After', nextValidRequestTime);
 	res.send(429, {error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
 };
-ExpressBrute.FailMark = function (req, res, next, nextValidRequestDate) {
+ExpressBrute.FailMark = function (req, res, next, nextValidRequestDate, nextValidRequestTime) {
 	res.status(429);
 	res.nextValidRequestDate = nextValidRequestDate;
+	res.nextValidRequestTime = nextValidRequestTime;
 	next();
 };
 ExpressBrute.MemoryStore = require('./lib/MemoryStore');

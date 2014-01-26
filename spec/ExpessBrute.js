@@ -478,7 +478,10 @@ describe("express brute", function () {
 
 		});
 		it('can return a 429 Too Many Requests', function () {
-			var res = {send: jasmine.createSpy()};
+			var res = {
+				send: jasmine.createSpy(),
+				header: function () {}
+			};
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: 10,
@@ -491,7 +494,10 @@ describe("express brute", function () {
 			expect(res.send.mostRecentCall.args[0]).toEqual(429);
 		});
 		it('can mark a response as failed, but continue processing', function () {
-			var res = {status: jasmine.createSpy()};
+			var res = {
+				status: jasmine.createSpy(),
+				header: function () {}
+			};
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: 10,
