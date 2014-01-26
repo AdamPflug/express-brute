@@ -155,10 +155,10 @@ ExpressBrute.prototype.getIPFromRequest = function (req) {
 };
 
 ExpressBrute.FailForbidden = function (req, res, next, nextValidRequestDate) {
-	res.send(403, {error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
+	res.send(429, {error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
 };
 ExpressBrute.FailMark = function (req, res, next, nextValidRequestDate) {
-	res.status(403);
+	res.status(429);
 	res.nextValidRequestDate = nextValidRequestDate;
 	next();
 };
