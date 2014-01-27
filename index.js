@@ -129,7 +129,7 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 					});
 				} else {
 					var failCallback = getFailCallback();
-					typeof failCallback === 'function' && failCallback(req, res, next, new Date(nextValidRequestTime), nextValidRequestTime);
+					typeof failCallback === 'function' && failCallback(req, res, next, new Date(nextValidRequestTime));
 				}
 			}, this));
 		},this));
@@ -154,14 +154,22 @@ ExpressBrute.prototype.getIPFromRequest = function (req) {
 	return req.connection.remoteAddress;
 };
 
-ExpressBrute.FailForbidden = function (req, res, next, nextValidRequestDate, nextValidRequestTime) {
-	res.header('Retry-After', nextValidRequestTime);
+var setRetryAfter = function (res, nextValidRequestDate) {
+	var secondUntilNextRequest = Math.ceil((nextValidRequestDate.getTime() - Date.now())/1000);
+	res.header('Retry-After', secondUntilNextRequest);
+};
+ExpressBrute.FailTooManyRequests = function (req, res, next, nextValidRequestDate) {
+	setRetryAfter(res, nextValidRequestDate);
 	res.send(429, {error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
 };
-ExpressBrute.FailMark = function (req, res, next, nextValidRequestDate, nextValidRequestTime) {
+ExpressBrute.FailForbidden = function (req, res, next, nextValidRequestDate) {
+	setRetryAfter(res, nextValidRequestDate);
+	res.send(403, {error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
+};
+ExpressBrute.FailMark = function (req, res, next, nextValidRequestDate) {
 	res.status(429);
+	setRetryAfter(res, nextValidRequestDate);
 	res.nextValidRequestDate = nextValidRequestDate;
-	res.nextValidRequestTime = nextValidRequestTime;
 	next();
 };
 ExpressBrute.MemoryStore = require('./lib/MemoryStore');
@@ -173,6 +181,6 @@ ExpressBrute.defaults = {
 	refreshTimeoutOnRequest: true,
 	minWait: 500,
 	maxWait: 1000*60*15, // 15 minutes
-	failCallback: ExpressBrute.FailForbidden
+	failCallback: ExpressBrute.FailTooManyRequests
 };
 ExpressBrute.instanceCount = 0;

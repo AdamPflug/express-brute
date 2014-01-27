@@ -478,10 +478,20 @@ describe("express brute", function () {
 
 		});
 		it('can return a 429 Too Many Requests', function () {
-			var res = {
-				send: jasmine.createSpy(),
-				header: function () {}
-			};
+			var res = new ResponseMock();
+			brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: 10,
+				maxWait: 100,
+				failCallback: ExpressBrute.FailTooManyRequests
+			});
+			brute.prevent(req(), res, nextSpy);
+			brute.prevent(req(), res, nextSpy);
+			expect(res.send).toHaveBeenCalled();
+			expect(res.send.mostRecentCall.args[0]).toEqual(429);
+		});
+		it('can return a 403 FailForbidden', function () {
+			var res = new ResponseMock();
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: 10,
@@ -491,13 +501,10 @@ describe("express brute", function () {
 			brute.prevent(req(), res, nextSpy);
 			brute.prevent(req(), res, nextSpy);
 			expect(res.send).toHaveBeenCalled();
-			expect(res.send.mostRecentCall.args[0]).toEqual(429);
+			expect(res.send.mostRecentCall.args[0]).toEqual(403);
 		});
 		it('can mark a response as failed, but continue processing', function () {
-			var res = {
-				status: jasmine.createSpy(),
-				header: function () {}
-			};
+			var res = new ResponseMock();
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: 10,
@@ -510,6 +517,18 @@ describe("express brute", function () {
 			expect(nextSpy.calls.length).toEqual(2);
 			expect(res.nextValidRequestDate).toBeDefined();
 			expect(res.nextValidRequestDate instanceof Date).toBeTruthy();
+		});
+		it('sets Retry-After', function () {
+			var res = new ResponseMock();
+			brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: 10,
+				maxWait: 100,
+				failCallback: ExpressBrute.FailTooManyRequests
+			});
+			brute.prevent(req(), res, nextSpy);
+			brute.prevent(req(), res, nextSpy);
+			expect(res.header).toHaveBeenCalledWith('Retry-After', 1);
 		});
 	});
 });
