@@ -30,7 +30,7 @@ app.post('/auth',
 Classes
 -------
 ### ExpressBrute(store, options)
-- `store` An instance of `ExpressBrute.MemoryStore` or `ExpressBrute.MemcachedStore`
+- `store` An instance of `ExpressBrute.MemoryStore` or some other ExpressBrute store (see a list of know stores below).
 - `options`
 	- `freeRetries`             The number of retires the user has before they need to start waiting (default: 2)
 	- `minWait`                 The initial wait time (in milliseconds) after the user runs out of retries (default: 500 milliseconds)
@@ -42,19 +42,8 @@ Classes
 	- `refreshTimeoutOnRequest` Defines whether the remaining `lifetime` of a counter should be based on the time since the last request (true) of the time since the first request (false). Useful for allowing limits over fixed periods of time, for example a limited number of requests per day. (Default: true)
 
 ### ExpressBrute.MemoryStore()
-An in-memory store for persisting request counts. Don't use this in production.
+An in-memory store for persisting request counts. Don't use this in production, instead choose one of the more robust store implementations listed below.
 
-### ExpressBrute.MemcachedStore(hosts, options)
-A memcached store for persisting request counts.
-- `hosts` Memcached servers locations, can by string, array, or hash.
-- `options`
-	- `prefix`       An optional prefix for each memcache key, in case you are sharing
-	                 your memcached servers with something generating its own keys.
-	- ...            The rest of the options will be passed directly to the node-memcached constructor.
-
-
-
-For details see [node-memcached](http://github.com/3rd-Eden/node-memcached).
 
 `ExpressBrute` Instance Methods
 -------------------------------
@@ -75,14 +64,23 @@ For details see [node-memcached](http://github.com/3rd-Eden/node-memcached).
 Built-in Failure Callbacks
 ---------------------------
 There are some built-in callbacks that come with BruteExpress that handle some common use cases.
-- `ExpressBrute.FailForbidden` Terminates the request and responds with a 403 and json error message
-- `ExpressBrute.FailMark` Sets res.nextValidRequestDate and the res.status=403, then calls next() to pass the request on to the appropriate routes
+- `ExpressBrute.FailTooManyRquests` Terminates the request and responses with a 429 (Too Many Requests) error that has a `Retry-After` header and a JSON error message.
+- `ExpressBrute.FailForbidden` Terminates the request and responds with a 403 (Forbidden) error that has a `Retry-After` header and a JSON error message. This is provided for compatibility with ExpressBrute versions prior to v0.5.0, for new users `FailTooManyRequests` is the preferred behavior.
+- `ExpressBrute.FailMark` Sets res.nextValidRequestDate, the Retry-After header and the res.status=429, then calls next() to pass the request on to the appropriate routes.
+
+`ExpressBrute` stores
+---------------------
+There are a number adapters that have been written to allow ExpressBrute to be used with different persistant storage implementations, some of the ones I know about include:
+- (Memcached)[https://github.com/AdamPflug/express-brute-memcached]
+- (Redis)[https://github.com/AdamPflug/express-brute-redis]
+- (MongoDB)[https://github.com/auth0/express-brute-mongo]
 
 A More Complex Example
 ----------------------
 ``` js
 require('connect-flash');
 var ExpressBrute = require('express-brute'),
+	MemcachedStore = require('express-brute-memcached'),
 	moment = require('moment'),
     store;
 
@@ -90,7 +88,7 @@ if (config.environment == 'development'){
 	store = new ExpressBrute.MemoryStore(); // stores state locally, don't use this in production
 } else {
 	// stores state with memcached
-	store = new ExpressBrute.MemcachedStore(['127.0.0.1'], {
+	store = new MemcachedStore(['127.0.0.1'], {
 		prefix: 'NoConflicts'
 	});
 }
@@ -143,6 +141,13 @@ app.post('/auth',
 
 Changelog
 ---------
+### v0.5.0
+* NEW: Added an additional `FailTooManyRequests` failure callback, that returns a 429 (TooManyRequests) error instead of 403 (Forbidden). This is a more accurate error status code.
+* NEW: All the built in failure callbacks now set the "Retry-After" header to the number of seconds until it is safe to try again. Per (RFC6585)[https://tools.ietf.org/html/rfc6585#section-4]
+* NEW: Documentation updated to list some known store implementations.
+* CHANGED: Default failure callback is now `FailTooManyRequests`. `FailForbidden` remains an option for backwards compatiblity.
+* CHANGED: ExpressBrute.MemcachedStore is no longer included by default, and is now available as a separate module (because there are multiple store options it doesn't really make sense to include one by default).
+
 ### v0.4.2
 * BUG: In some cases when no callbacks were supplied memcached would drop the request. Ensure that memcached always sees a callback even if ExpressBrute isn't given one.
 

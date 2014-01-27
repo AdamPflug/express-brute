@@ -5,7 +5,6 @@ describe("express brute", function () {
 	describe("basic functionality", function () {
 		it("has some memory stores", function () {
 			expect(ExpressBrute.MemoryStore).toBeDefined();
-			expect(ExpressBrute.MemcachedStore).toBeDefined();
 		});
 		it("can be initialized", function () {
 			var store = new ExpressBrute.MemoryStore();

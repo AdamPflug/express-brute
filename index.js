@@ -163,7 +163,6 @@ ExpressBrute.FailMark = function (req, res, next, nextValidRequestDate) {
 	next();
 };
 ExpressBrute.MemoryStore = require('./lib/MemoryStore');
-ExpressBrute.MemcachedStore = require('./lib/MemcachedStore');
 ExpressBrute.defaults = {
 	freeRetries: 2,
 	proxyDepth: 0,
