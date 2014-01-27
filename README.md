@@ -143,7 +143,7 @@ Changelog
 ---------
 ### v0.5.0
 * NEW: Added an additional `FailTooManyRequests` failure callback, that returns a 429 (TooManyRequests) error instead of 403 (Forbidden). This is a more accurate error status code.
-* NEW: All the built in failure callbacks now set the "Retry-After" header to the number of seconds until it is safe to try again. Per (RFC6585)[https://tools.ietf.org/html/rfc6585#section-4]
+* NEW: All the built in failure callbacks now set the "Retry-After" header to the number of seconds until it is safe to try again. Per [RFC6585](https://tools.ietf.org/html/rfc6585#section-4)
 * NEW: Documentation updated to list some known store implementations.
 * CHANGED: Default failure callback is now `FailTooManyRequests`. `FailForbidden` remains an option for backwards compatiblity.
 * CHANGED: ExpressBrute.MemcachedStore is no longer included by default, and is now available as a separate module (because there are multiple store options it doesn't really make sense to include one by default).
