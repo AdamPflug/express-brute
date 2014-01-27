@@ -71,9 +71,9 @@ There are some built-in callbacks that come with BruteExpress that handle some c
 `ExpressBrute` stores
 ---------------------
 There are a number adapters that have been written to allow ExpressBrute to be used with different persistant storage implementations, some of the ones I know about include:
-- (Memcached)[https://github.com/AdamPflug/express-brute-memcached]
-- (Redis)[https://github.com/AdamPflug/express-brute-redis]
-- (MongoDB)[https://github.com/auth0/express-brute-mongo]
+- [Memcached](https://github.com/AdamPflug/express-brute-memcached)
+- [Redis](https://github.com/AdamPflug/express-brute-redis)
+- [MongoDB](https://github.com/auth0/express-brute-mongo)
 
 A More Complex Example
 ----------------------
