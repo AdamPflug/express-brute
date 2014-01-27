@@ -113,7 +113,7 @@ describe("express brute", function () {
 				expect(errorSpy).toHaveBeenCalled();
 				expect(errorSpy.mostRecentCall.args[3].getTime()).toEqual(expectedTime);
 			});
-			
+
 		});
 		it('works even after the maxwait is reached', function () {
 			brute = new ExpressBrute(store, {
@@ -406,7 +406,7 @@ describe("express brute", function () {
 			runs(function () {
 				expect(errorSpy).toHaveBeenCalled();
 				expect(errorSpy2).not.toHaveBeenCalled();
-	
+
 				brute.prevent(req(), new ResponseMock(), nextSpy);
 				brute2.prevent(req(), new ResponseMock(), nextSpy);
 			});
@@ -474,10 +474,23 @@ describe("express brute", function () {
 			store = new ExpressBrute.MemoryStore();
 			req = function () { return { connection: { remoteAddress: '1.2.3.4' }}; };
 			nextSpy = jasmine.createSpy();
-			
+
 		});
-		it('can return a 403 forbidden', function () {
-			var res = {send: jasmine.createSpy()};
+		it('can return a 429 Too Many Requests', function () {
+			var res = new ResponseMock();
+			brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: 10,
+				maxWait: 100,
+				failCallback: ExpressBrute.FailTooManyRequests
+			});
+			brute.prevent(req(), res, nextSpy);
+			brute.prevent(req(), res, nextSpy);
+			expect(res.send).toHaveBeenCalled();
+			expect(res.send.mostRecentCall.args[0]).toEqual(429);
+		});
+		it('can return a 403 Forbidden', function () {
+			var res = new ResponseMock();
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: 10,
@@ -490,7 +503,7 @@ describe("express brute", function () {
 			expect(res.send.mostRecentCall.args[0]).toEqual(403);
 		});
 		it('can mark a response as failed, but continue processing', function () {
-			var res = {status: jasmine.createSpy()};
+			var res = new ResponseMock();
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: 10,
@@ -499,10 +512,22 @@ describe("express brute", function () {
 			});
 			brute.prevent(req(), res, nextSpy);
 			brute.prevent(req(), res, nextSpy);
-			expect(res.status).toHaveBeenCalledWith(403);
+			expect(res.status).toHaveBeenCalledWith(429);
 			expect(nextSpy.calls.length).toEqual(2);
 			expect(res.nextValidRequestDate).toBeDefined();
 			expect(res.nextValidRequestDate instanceof Date).toBeTruthy();
+		});
+		it('sets Retry-After', function () {
+			var res = new ResponseMock();
+			brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: 10,
+				maxWait: 100,
+				failCallback: ExpressBrute.FailTooManyRequests
+			});
+			brute.prevent(req(), res, nextSpy);
+			brute.prevent(req(), res, nextSpy);
+			expect(res.header).toHaveBeenCalledWith('Retry-After', 1);
 		});
 	});
 });

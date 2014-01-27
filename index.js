@@ -76,7 +76,7 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 					reset: reset
 				};
 			}
-			
+
 
 			// filter request
 			this.store.get(key, _.bind(function (err, value) {
@@ -154,11 +154,21 @@ ExpressBrute.prototype.getIPFromRequest = function (req) {
 	return req.connection.remoteAddress;
 };
 
+var setRetryAfter = function (res, nextValidRequestDate) {
+	var secondUntilNextRequest = Math.ceil((nextValidRequestDate.getTime() - Date.now())/1000);
+	res.header('Retry-After', secondUntilNextRequest);
+};
+ExpressBrute.FailTooManyRequests = function (req, res, next, nextValidRequestDate) {
+	setRetryAfter(res, nextValidRequestDate);
+	res.send(429, {error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
+};
 ExpressBrute.FailForbidden = function (req, res, next, nextValidRequestDate) {
+	setRetryAfter(res, nextValidRequestDate);
 	res.send(403, {error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
 };
 ExpressBrute.FailMark = function (req, res, next, nextValidRequestDate) {
-	res.status(403);
+	res.status(429);
+	setRetryAfter(res, nextValidRequestDate);
 	res.nextValidRequestDate = nextValidRequestDate;
 	next();
 };
@@ -170,6 +180,6 @@ ExpressBrute.defaults = {
 	refreshTimeoutOnRequest: true,
 	minWait: 500,
 	maxWait: 1000*60*15, // 15 minutes
-	failCallback: ExpressBrute.FailForbidden
+	failCallback: ExpressBrute.FailTooManyRequests
 };
 ExpressBrute.instanceCount = 0;

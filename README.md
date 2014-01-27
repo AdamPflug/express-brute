@@ -20,7 +20,7 @@ var store = new ExpressBrute.MemoryStore(); // stores state locally, don't use t
 var bruteforce = new ExpressBrute(store);
 
 app.post('/auth',
-	bruteforce.prevent, // error 403 if we hit this route too often
+	bruteforce.prevent, // error 429 if we hit this route too often
 	function (req, res, next) {
 		res.send('Success!');
 	}
@@ -147,6 +147,7 @@ Changelog
 * NEW: Documentation updated to list some known store implementations.
 * CHANGED: Default failure callback is now `FailTooManyRequests`. `FailForbidden` remains an option for backwards compatiblity.
 * CHANGED: ExpressBrute.MemcachedStore is no longer included by default, and is now available as a separate module (because there are multiple store options it doesn't really make sense to include one by default).
+* CHANGED: `FailMark` no longer sets returns 403 Forbidden, instead does 429 TooManyRequets.
 
 ### v0.4.2
 * BUG: In some cases when no callbacks were supplied memcached would drop the request. Ensure that memcached always sees a callback even if ExpressBrute isn't given one.
