@@ -30,7 +30,7 @@ app.post('/auth',
 Classes
 -------
 ### ExpressBrute(store, options)
-- `store` An instance of `ExpressBrute.MemoryStore` or some other ExpressBrute store (see a list of know stores below).
+- `store` An instance of `ExpressBrute.MemoryStore` or some other ExpressBrute store (see a list of known stores below).
 - `options`
 	- `freeRetries`             The number of retires the user has before they need to start waiting (default: 2)
 	- `minWait`                 The initial wait time (in milliseconds) after the user runs out of retries (default: 500 milliseconds)
