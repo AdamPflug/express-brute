@@ -141,6 +141,9 @@ app.post('/auth',
 
 Changelog
 ---------
+### v0.5.1
+* BUG: When setting proxyDepth to 1, ips is never populated with proxied X-Forwarded-For IP.
+
 ### v0.5.0
 * NEW: Added an additional `FailTooManyRequests` failure callback, that returns a 429 (TooManyRequests) error instead of 403 (Forbidden). This is a more accurate error status code.
 * NEW: All the built in failure callbacks now set the "Retry-After" header to the number of seconds until it is safe to try again. Per [RFC6585](https://tools.ietf.org/html/rfc6585#section-4)
