@@ -141,6 +141,9 @@ app.post('/auth',
 
 Changelog
 ---------
+### v0.5.2
+* CHANGED: Stopped using res.send(status, body), as it is deprecated in express 4.x. Instead call res.status and res.send separately (Thanks marinewater!)
+
 ### v0.5.1
 * BUG: When setting proxyDepth to 1, ips is never populated with proxied X-Forwarded-For IP.
 
