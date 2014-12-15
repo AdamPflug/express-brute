@@ -487,7 +487,7 @@ describe("express brute", function () {
 			brute.prevent(req(), res, nextSpy);
 			brute.prevent(req(), res, nextSpy);
 			expect(res.send).toHaveBeenCalled();
-			expect(res.send.mostRecentCall.args[0]).toEqual(429);
+			expect(res.status.mostRecentCall.args[0]).toEqual(429);
 		});
 		it('can return a 403 Forbidden', function () {
 			var res = new ResponseMock();
@@ -500,7 +500,7 @@ describe("express brute", function () {
 			brute.prevent(req(), res, nextSpy);
 			brute.prevent(req(), res, nextSpy);
 			expect(res.send).toHaveBeenCalled();
-			expect(res.send.mostRecentCall.args[0]).toEqual(403);
+			expect(res.status.mostRecentCall.args[0]).toEqual(403);
 		});
 		it('can mark a response as failed, but continue processing', function () {
 			var res = new ResponseMock();
