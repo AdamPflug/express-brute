@@ -74,6 +74,9 @@ There are a number adapters that have been written to allow ExpressBrute to be u
 - [Memcached](https://github.com/AdamPflug/express-brute-memcached)
 - [Redis](https://github.com/AdamPflug/express-brute-redis)
 - [MongoDB](https://github.com/auth0/express-brute-mongo)
+- [Sequelize (SQL)](https://github.com/maddy2get/express-brute-sequelize)
+
+If you write your own store and want me to add it to the list, just drop me an [email](mailto:adam.pflug@gmail.com) or [create an issue](https://github.com/AdamPflug/express-brute/issues/new).
 
 A More Complex Example
 ----------------------
