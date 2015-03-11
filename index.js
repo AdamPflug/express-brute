@@ -81,7 +81,14 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 			// filter request
 			this.store.get(key, _.bind(function (err, value) {
 				if (err) {
-					throw "Cannot get request count";
+					this.handleStoreError({
+						req: req,
+						res: res,
+						next: next,
+						message: "Cannot get request count",
+						error: err
+					});
+					return;
 				}
 
 				var count = 0,
@@ -123,7 +130,14 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 						firstRequest: new Date(firstRequestTime)
 					}, remainingLifetime, function (err) {
 						if (err) {
-							throw "Cannot increment request count";
+							this.handleStoreError({
+								req: req,
+								res: res,
+								next: next,
+								message: "Cannot increment request count",
+								error: err
+							});
+							return;
 						}
 						typeof next == 'function' && next();
 					});
@@ -137,7 +151,17 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 };
 ExpressBrute.prototype.reset = function (ip, key, callback) {
 	key = getKey([ip, this.name, key]);
-	this.store.reset(key, callback);
+	this.store.reset(key, _.bind(function (err) {
+		if (err) {
+			this.handleStoreError({
+				message: "Cannot reset request count",
+				error: err,
+				key: key
+			});
+		} else {
+			typeof callback == 'function' && callback.apply(this, arguments);
+		}
+	},this));
 };
 ExpressBrute.prototype.now = function () {
 	return Date.now();
@@ -182,6 +206,12 @@ ExpressBrute.defaults = {
 	refreshTimeoutOnRequest: true,
 	minWait: 500,
 	maxWait: 1000*60*15, // 15 minutes
-	failCallback: ExpressBrute.FailTooManyRequests
+	failCallback: ExpressBrute.FailTooManyRequests,
+	handleStoreError: function (err) {
+		throw {
+			message: error.message,
+			parent: error.parent
+		};
+	}
 };
 ExpressBrute.instanceCount = 0;
