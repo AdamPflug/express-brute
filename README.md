@@ -36,10 +36,11 @@ Classes
 	- `minWait`                 The initial wait time (in milliseconds) after the user runs out of retries (default: 500 milliseconds)
 	- `maxWait`                 The maximum amount of time (in milliseconds) between requests the user needs to wait (default: 15 minutes). The wait for a given request is determined by adding the time the user needed to wait for the previous two requests.
 	- `lifetime`                The length of time (in seconds since the last request) to remember the number of requests that have been made by an IP. By default it will be set to `maxWait * the number of attempts before you hit maxWait` to discourage simply waiting for the lifetime to expire before resuming an attack. With default values this is about 6 hours.
-	- `failCallback` gets called with (`req`, `resp`, `next`, `nextValidRequestDate`) when a request is rejected (default: ExpressBrute.FailForbidden)
+	- `failCallback`            Gets called with (`req`, `resp`, `next`, `nextValidRequestDate`) when a request is rejected (default: ExpressBrute.FailForbidden)
 	- `proxyDepth`              Specifies how many levels of the `X-Forwarded-For` header to trust. If your web server is behind a CDN and/or load balancer you'll need to set this to however many levels of proxying it's behind to get a valid IP. Setting this too high allows attackers to get around brute force protection by spoofing the `X-Forwarded-For` header, so don't set it higher than you need to (default: 0)
 	- `attachResetToRequest`    Specify whether or not a simplified reset method should be attached at `req.brute.reset`. The simplified method takes only a callback, and resets all `ExpressBrute` middleware that was called on the current request. If multiple instances of `ExpressBrute` have middleware on the same request, only those with `attachResetToRequest` set to true will be reset (default: true)
 	- `refreshTimeoutOnRequest` Defines whether the remaining `lifetime` of a counter should be based on the time since the last request (true) of the time since the first request (false). Useful for allowing limits over fixed periods of time, for example a limited number of requests per day. (Default: true)
+	- `handleStoreError`        Gets called whenever an error occurs with the persistent store occurs that cannot be recovered from. It is passed an object containing properties `message` (a description of the message), `parent` (the error raised by the session store), and [`key`, `ip`] or [`req`, `res`, `next`] depending on whether or the error occurs during `reset` or occurs in the middleware.
 
 ### ExpressBrute.MemoryStore()
 An in-memory store for persisting request counts. Don't use this in production, instead choose one of the more robust store implementations listed below.
@@ -70,7 +71,7 @@ There are some built-in callbacks that come with BruteExpress that handle some c
 
 `ExpressBrute` stores
 ---------------------
-There are a number adapters that have been written to allow ExpressBrute to be used with different persistant storage implementations, some of the ones I know about include:
+There are a number adapters that have been written to allow ExpressBrute to be used with different persistent storage implementations, some of the ones I know about include:
 - [Memcached](https://github.com/AdamPflug/express-brute-memcached)
 - [Redis](https://github.com/AdamPflug/express-brute-redis)
 - [MongoDB](https://github.com/auth0/express-brute-mongo)
@@ -144,6 +145,10 @@ app.post('/auth',
 
 Changelog
 ---------
+### v0.5.3
+* NEW: Added the `handleStoreError` option to allow more customizable handling of errors that are thrown by the persistent store. Default behavior is to throw the errors as an exception - there is nothing ExpressBrute can do to recover.
+* CHANGED: Errors thrown as a result of errors raised by the store now include those errors as well, for debugging purposes.
+
 ### v0.5.2
 * CHANGED: Stopped using res.send(status, body), as it is deprecated in express 4.x. Instead call res.status and res.send separately (Thanks marinewater!)
 
