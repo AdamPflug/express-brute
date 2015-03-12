@@ -1,16 +1,6 @@
 var _ = require('underscore');
 var crypto = require('crypto');
 
-function getKey(arr) {
-	var key = '';
-	_(arr).each(function (part) {
-		if (part) {
-			key += crypto.createHash('sha256').update(part).digest('base64');
-		}
-	});
-	return crypto.createHash('sha256').update(key).digest('base64');
-}
-
 var ExpressBrute = module.exports = function (store, options) {
 	var i;
 	ExpressBrute.instanceCount++;
@@ -55,7 +45,7 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 	// create middleware
 	return _.bind(function (req, res, next) {
 		keyFunc(req, res, _.bind(function (key) {
-			key = getKey([this.getIPFromRequest(req), this.name, key]);
+			key = ExpressBrute._getKey([this.getIPFromRequest(req), this.name, key]);
 
 			// attach a simpler "reset" function to req.brute.reset
 			if (this.options.attachResetToRequest) {
@@ -81,12 +71,12 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 			// filter request
 			this.store.get(key, _.bind(function (err, value) {
 				if (err) {
-					this.handleStoreError({
+					this.options.handleStoreError({
 						req: req,
 						res: res,
 						next: next,
 						message: "Cannot get request count",
-						error: err
+						parent: err
 					});
 					return;
 				}
@@ -128,19 +118,19 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 						count: count+1,
 						lastRequest: new Date(this.now()),
 						firstRequest: new Date(firstRequestTime)
-					}, remainingLifetime, function (err) {
+					}, remainingLifetime, _.bind(function (err) {
 						if (err) {
-							this.handleStoreError({
+							this.options.handleStoreError({
 								req: req,
 								res: res,
 								next: next,
 								message: "Cannot increment request count",
-								error: err
+								parent: err
 							});
 							return;
 						}
 						typeof next == 'function' && next();
-					});
+					},this));
 				} else {
 					var failCallback = getFailCallback();
 					typeof failCallback === 'function' && failCallback(req, res, next, new Date(nextValidRequestTime));
@@ -150,13 +140,14 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 	}, this);
 };
 ExpressBrute.prototype.reset = function (ip, key, callback) {
-	key = getKey([ip, this.name, key]);
+	key = ExpressBrute._getKey([ip, this.name, key]);
 	this.store.reset(key, _.bind(function (err) {
 		if (err) {
-			this.handleStoreError({
+			this.options.handleStoreError({
 				message: "Cannot reset request count",
-				error: err,
-				key: key
+				parent: err,
+				key: key,
+				ip: ip
 			});
 		} else {
 			typeof callback == 'function' && callback.apply(this, arguments);
@@ -198,6 +189,16 @@ ExpressBrute.FailMark = function (req, res, next, nextValidRequestDate) {
 	res.nextValidRequestDate = nextValidRequestDate;
 	next();
 };
+ExpressBrute._getKey = function (arr) {
+	var key = '';
+	_(arr).each(function (part) {
+		if (part) {
+			key += crypto.createHash('sha256').update(part).digest('base64');
+		}
+	});
+	return crypto.createHash('sha256').update(key).digest('base64');
+};
+
 ExpressBrute.MemoryStore = require('./lib/MemoryStore');
 ExpressBrute.defaults = {
 	freeRetries: 2,
@@ -209,8 +210,8 @@ ExpressBrute.defaults = {
 	failCallback: ExpressBrute.FailTooManyRequests,
 	handleStoreError: function (err) {
 		throw {
-			message: error.message,
-			parent: error.parent
+			message: err.message,
+			parent: err.parent
 		};
 	}
 };

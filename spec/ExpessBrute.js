@@ -530,4 +530,90 @@ describe("express brute", function () {
 			expect(res.header).toHaveBeenCalledWith('Retry-After', 1);
 		});
 	});
+	describe("store error handling", function () {
+		var brute, store, errorSpy, storeErrorSpy, nextSpy, req, res, err, done;
+		beforeEach(function () {
+			store = new ExpressBrute.MemoryStore();
+			errorSpy = jasmine.createSpy();
+			storeErrorSpy = jasmine.createSpy();
+			nextSpy = jasmine.createSpy();
+			req = { connection: { remoteAddress: '1.2.3.4' }};
+			res = new ResponseMock();
+			err = "Example Error";
+			brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: 10,
+				maxWait: 100,
+				failCallback: errorSpy,
+				handleStoreError: storeErrorSpy
+			});
+		});
+		it('should handle get errors', function () {
+			spyOn(store, 'get').andCallFake(function (key, callback) {
+				callback(err);
+			});
+			brute.prevent(req, res, nextSpy);
+			expect(storeErrorSpy).toHaveBeenCalledWith({
+				req: req,
+				res: res,
+				next: nextSpy,
+				message: 'Cannot get request count',
+				parent: err
+			});
+			expect(errorSpy).not.toHaveBeenCalled();
+			expect(nextSpy).not.toHaveBeenCalled();
+		});
+		it('should handle set errors', function () {
+			spyOn(store, 'set').andCallFake(function (key, value, lifetime, callback) {
+				callback(err);
+			});
+			brute.prevent(req, res, nextSpy);
+			expect(storeErrorSpy).toHaveBeenCalledWith({
+				req: req,
+				res: res,
+				next: nextSpy,
+				message: 'Cannot increment request count',
+				parent: err
+			});
+			expect(errorSpy).not.toHaveBeenCalled();
+			expect(nextSpy).not.toHaveBeenCalled();
+		});
+		it('should handle reset errors', function () {
+			spyOn(store, 'reset').andCallFake(function (key, callback) {
+				callback(err);
+			});
+			var key = 'testKey';
+			var middelware = brute.getMiddleware({
+				key: key
+			});
+			brute.reset('1.2.3.4', key, nextSpy);
+			expect(storeErrorSpy).toHaveBeenCalledWith({
+				message: "Cannot reset request count",
+				parent: err,
+				key: ExpressBrute._getKey(['1.2.3.4', brute.name, key]),
+				ip: '1.2.3.4'
+			});
+			expect(errorSpy).not.toHaveBeenCalled();
+			expect(nextSpy).not.toHaveBeenCalled();
+		});
+		it('should throw an exception by default', function () {
+			brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: 10,
+				maxWait: 100,
+				failCallback: errorSpy
+			});
+			spyOn(store, 'get').andCallFake(function (key, callback) {
+				callback(err);
+			});
+			expect(function () {
+				brute.prevent(req, res, nextSpy);
+			}).toThrow({
+				message: 'Cannot get request count',
+				parent: err
+			});
+			expect(errorSpy).not.toHaveBeenCalled();
+			expect(nextSpy).not.toHaveBeenCalled();
+		});
+	});
 });
