@@ -77,20 +77,27 @@ describe("express brute", function () {
 				expect(errorSpy).not.toHaveBeenCalled();
 			});
 		});
-		it ('allows requests if you reset the timer', function () {
+		it ('allows requests if you reset the timer', function (done) {
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			expect(errorSpy).not.toHaveBeenCalled();
-			brute.reset('1.2.3.4');
-			brute.prevent(req(), new ResponseMock(), nextSpy);
-			expect(errorSpy).not.toHaveBeenCalled();
+			brute.reset('1.2.3.4', null, function () {
+				brute.prevent(req(), new ResponseMock(), nextSpy);
+				expect(errorSpy).not.toHaveBeenCalled();
+				done();
+			});
+			expect(nextSpy.calls.length).toEqual(1); // fails if reset callback is called synchronously
 		});
-		it('adds a reset shortcut to the request object', function () {
+		it('adds a reset shortcut to the request object', function (done) {
 			spyOn(brute, 'prevent').andCallThrough();
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			expect(errorSpy).not.toHaveBeenCalled();
-			brute.prevent.mostRecentCall.args[0].brute.reset();
-			brute.prevent(req(), new ResponseMock(), nextSpy);
-			expect(errorSpy).not.toHaveBeenCalled();
+			brute.prevent.mostRecentCall.args[0].brute.reset(function () {
+				brute.prevent(req(), new ResponseMock(), nextSpy);
+				expect(errorSpy).not.toHaveBeenCalled();
+				done();
+			});
+			expect(nextSpy.calls.length).toEqual(1); // fails if reset callback is called synchronously
+			
 		});
 		it ('allows requests if you use different ips', function () {
 			brute.prevent(req(), new ResponseMock(), nextSpy);

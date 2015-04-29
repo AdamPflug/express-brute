@@ -50,7 +50,11 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 			// attach a simpler "reset" function to req.brute.reset
 			if (this.options.attachResetToRequest) {
 				var reset = _.bind(function (callback) {
-					this.store.reset(key, callback);
+					this.store.reset(key, function (err) {
+						process.nextTick(function () {
+							callback(err);
+						});
+					});
 				}, this);
 				if (req.brute && req.brute.reset) {
 					// wrap existing reset if one exists
@@ -150,7 +154,9 @@ ExpressBrute.prototype.reset = function (ip, key, callback) {
 				ip: ip
 			});
 		} else {
-			typeof callback == 'function' && callback.apply(this, arguments);
+			process.nextTick(_.bind(function () {
+				typeof callback == 'function' && callback.apply(this, arguments);
+			}, this));
 		}
 	},this));
 };
