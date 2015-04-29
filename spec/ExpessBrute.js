@@ -17,8 +17,8 @@ describe("express brute", function () {
 		var brute, store, errorSpy, nextSpy, req, req2, done;
 		beforeEach(function () {
 			store = new ExpressBrute.MemoryStore();
-			errorSpy = jasmine.createSpy();
-			nextSpy = jasmine.createSpy();
+			errorSpy = jasmine.createSpy("Error");
+			nextSpy = jasmine.createSpy("Next");
 			req = function () { return { connection: { remoteAddress: '1.2.3.4' }}; };
 			req2 = function () { return { connection: { remoteAddress: '5.6.7.8' }}; };
 			brute = new ExpressBrute(store, {
@@ -226,7 +226,7 @@ describe("express brute", function () {
 				lifetime: 1,
 				failCallback: errorSpy
 			});
-			var errorSpy2 = jasmine.createSpy();
+			var errorSpy2 = jasmine.createSpy("Error 2");
 			var mid = brute.getMiddleware({
 				failCallback: errorSpy2
 			});
@@ -243,8 +243,8 @@ describe("express brute", function () {
 		var brute, store, errorSpy, nextSpy, req, done;
 		beforeEach(function () {
 			store = new ExpressBrute.MemoryStore();
-			errorSpy = jasmine.createSpy();
-			nextSpy = jasmine.createSpy();
+			errorSpy = jasmine.createSpy("Error");
+			nextSpy = jasmine.createSpy("Next");
 			req = function () { return { connection: { remoteAddress: '1.2.3.4' }}; };
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
@@ -317,8 +317,8 @@ describe("express brute", function () {
 		var brute, store, errorSpy, nextSpy, req, req2;
 		beforeEach(function () {
 			store = new ExpressBrute.MemoryStore();
-			errorSpy = jasmine.createSpy("errorSpy");
-			nextSpy = jasmine.createSpy();
+			errorSpy = jasmine.createSpy("Error");
+			nextSpy = jasmine.createSpy("Next");
 			req = function () {
 				return {
 					connection: {
@@ -370,9 +370,9 @@ describe("express brute", function () {
 		var brute, brute2, store, errorSpy, errorSpy2, nextSpy, req;
 		beforeEach(function () {
 			store = new ExpressBrute.MemoryStore();
-			errorSpy = jasmine.createSpy("errorSpy");
-			errorSpy2 = jasmine.createSpy("errorSpy2");
-			nextSpy = jasmine.createSpy();
+			errorSpy = jasmine.createSpy("Error");
+			errorSpy2 = jasmine.createSpy("Error 2");
+			nextSpy = jasmine.createSpy("Next");
 			req = function () { return { connection: { remoteAddress: '1.2.3.4' }}; };
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
@@ -473,7 +473,7 @@ describe("express brute", function () {
 		beforeEach(function () {
 			store = new ExpressBrute.MemoryStore();
 			req = function () { return { connection: { remoteAddress: '1.2.3.4' }}; };
-			nextSpy = jasmine.createSpy();
+			nextSpy = jasmine.createSpy("Next");
 
 		});
 		it('can return a 429 Too Many Requests', function () {
@@ -534,9 +534,9 @@ describe("express brute", function () {
 		var brute, store, errorSpy, storeErrorSpy, nextSpy, req, res, err, done;
 		beforeEach(function () {
 			store = new ExpressBrute.MemoryStore();
-			errorSpy = jasmine.createSpy();
-			storeErrorSpy = jasmine.createSpy();
-			nextSpy = jasmine.createSpy();
+			errorSpy = jasmine.createSpy("Error");
+			storeErrorSpy = jasmine.createSpy("Store Error");
+			nextSpy = jasmine.createSpy("Next");
 			req = { connection: { remoteAddress: '1.2.3.4' }};
 			res = new ResponseMock();
 			err = "Example Error";
