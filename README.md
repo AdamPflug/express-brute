@@ -58,6 +58,7 @@ An in-memory store for persisting request counts. Don't use this in production, 
 	- `key`           can be a string or alternatively it can be a `function(req, res, next)`
 	                  that or calls `next`, passing a string as the first parameter.
 	- `failCallback`  Allows you to override the value of `failCallback` for this middleware
+	- `ignoreIp`      Disregard IP address when matching requests if set to true. Defaults to false.
 - `reset(ip, key, next)`    Resets the wait time between requests back to its initial value. You can pass `null`
                             for `key` if you want to reset a request protected by `protect`.
 - `getIPFromRequest(req)`   Uses the current proxy trust settings to get the current IP from a request object
