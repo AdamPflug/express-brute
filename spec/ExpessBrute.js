@@ -77,27 +77,52 @@ describe("express brute", function () {
 				expect(errorSpy).not.toHaveBeenCalled();
 			});
 		});
-		it ('allows requests if you reset the timer', function (done) {
-			brute.prevent(req(), new ResponseMock(), nextSpy);
-			expect(errorSpy).not.toHaveBeenCalled();
-			brute.reset('1.2.3.4', null, function () {
+		it ('allows requests if you reset the timer', function () {
+			done = jasmine.createSpy();
+			runs(function () {
 				brute.prevent(req(), new ResponseMock(), nextSpy);
 				expect(errorSpy).not.toHaveBeenCalled();
-				done();
+				brute.reset('1.2.3.4', null, done);
+				expect(nextSpy.calls.length).toEqual(1); // fails if reset callback is called synchronously
 			});
-			expect(nextSpy.calls.length).toEqual(1); // fails if reset callback is called synchronously
-		});
-		it('adds a reset shortcut to the request object', function (done) {
-			spyOn(brute, 'prevent').andCallThrough();
-			brute.prevent(req(), new ResponseMock(), nextSpy);
-			expect(errorSpy).not.toHaveBeenCalled();
-			brute.prevent.mostRecentCall.args[0].brute.reset(function () {
+			waitsFor(function () {
+				return done.calls.length > 0;
+			});
+			runs(function () {
 				brute.prevent(req(), new ResponseMock(), nextSpy);
 				expect(errorSpy).not.toHaveBeenCalled();
-				done();
 			});
-			expect(nextSpy.calls.length).toEqual(1); // fails if reset callback is called synchronously
 			
+		});
+		it('adds a reset shortcut to the request object', function () {
+			done = jasmine.createSpy();
+			runs(function () {
+				spyOn(brute, 'prevent').andCallThrough();
+				brute.prevent(req(), new ResponseMock(), nextSpy);
+				expect(errorSpy).not.toHaveBeenCalled();
+				brute.prevent.mostRecentCall.args[0].brute.reset(done);
+				expect(nextSpy.calls.length).toEqual(1); // fails if reset callback is called synchronously
+			});
+			waitsFor(function () {
+				return done.calls.length > 0;
+			});
+			runs(function () {
+				brute.prevent(req(), new ResponseMock(), nextSpy);
+				expect(errorSpy).not.toHaveBeenCalled();
+			});
+			
+		});
+		it("resets even if you don't pass a callback", function () {
+			done = jasmine.createSpy();
+			runs(function () {
+				brute.prevent(req(), new ResponseMock(), nextSpy);
+				brute.reset('1.2.3.4', null);
+			});
+			waits(10);
+			runs(function () {
+				brute.prevent(req(), new ResponseMock(), nextSpy);
+				expect(errorSpy).not.toHaveBeenCalled();
+			});
 		});
 		it ('allows requests if you use different ips', function () {
 			brute.prevent(req(), new ResponseMock(), nextSpy);

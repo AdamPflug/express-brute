@@ -51,9 +51,11 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 			if (this.options.attachResetToRequest) {
 				var reset = _.bind(function (callback) {
 					this.store.reset(key, function (err) {
-						process.nextTick(function () {
-							callback(err);
-						});
+						if (typeof callback == 'function') {
+							process.nextTick(function () {
+								callback(err);
+							});
+						}
 					});
 				}, this);
 				if (req.brute && req.brute.reset) {
@@ -154,9 +156,11 @@ ExpressBrute.prototype.reset = function (ip, key, callback) {
 				ip: ip
 			});
 		} else {
-			process.nextTick(_.bind(function () {
-				typeof callback == 'function' && callback.apply(this, arguments);
-			}, this));
+			if (typeof callback == 'function') {
+				process.nextTick(_.bind(function () {
+					callback.apply(this, arguments);
+				}, this));
+			}
 		}
 	},this));
 };
