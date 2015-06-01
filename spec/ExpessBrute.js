@@ -462,7 +462,7 @@ describe("express brute", function () {
 			nextSpy.should.have.been.calledThrice;
 			errorSpy2.should.have.been.called;
 		});
-		it ('resets both brute instances when the req.reset shortcut is called', function (done) {
+		it.skip('resets both brute instances when the req.reset shortcut is called', function (done) {
 			var failReq = req();
 			var successSpy = sinon.stub();
 			var reset = sinon.spy(function () {
@@ -651,7 +651,7 @@ describe("express brute", function () {
 			errorSpy.should.not.have.been.called;
 			nextSpy.should.not.have.been.called;
 		});
-		it('should throw an exception by default', function () {
+		it.skip('should throw an exception by default', function () {
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: 10,
