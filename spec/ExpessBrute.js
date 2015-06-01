@@ -328,9 +328,9 @@ describe("express brute", function () {
 
 			mid(firstReq = req(), new ResponseMock(), nextSpy);
 			expect(nextSpy.calls.length).toEqual(1);
-			firstReq.brute.reset(function() {});
-            mid(req(), new ResponseMock(), nextSpy);
-            expect(nextSpy.calls.length).toEqual(2);
+			firstReq.brute.reset();
+			mid(req(), new ResponseMock(), nextSpy);
+			expect(nextSpy.calls.length).toEqual(2);
 		});
 		it ('respects the attachResetToRequest', function () {
 			brute.options.attachResetToRequest = false;
