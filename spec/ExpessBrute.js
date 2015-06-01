@@ -102,58 +102,56 @@ describe("express brute", function () {
 			});
 			
 		});
-		it('adds a reset shortcut to the request object', function () {
-			done = sinon.stub();
-			runs(function () {
-				sinon.spy(brute, 'prevent');
+		it('adds a reset shortcut to the request object', function (done) {
+			var reset = sinon.spy(function () {
 				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy).not.toHaveBeenCalled();
-				brute.prevent.mostRecentCall.args[0].brute.reset(done);
-				expect(nextSpy.calls.length).toEqual(1); // fails if reset callback is called synchronously
-			});
-			waitsFor(function () {
-				return done.calls.length > 0;
-			});
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy).not.toHaveBeenCalled();
+				errorSpy.should.not.have.been.called;
 			});
 			
-		});
-		it("resets even if you don't pass a callback", function () {
-			done = sinon.stub();
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				brute.reset('1.2.3.4', null);
+			var reqObj = req();
+			brute.prevent(reqObj, new ResponseMock(), nextSpy);
+			errorSpy.should.not.have.been.called;
+			should.exist(reqObj.brute);
+			should.exist(reqObj.brute.reset);
+			reqObj.brute.reset(reset);
+			nextSpy.should.have.been.calledOnce; // fails if reset callback is called synchronously
+
+			process.nextTick(function () {
+				reset.should.have.been.called;
+				done();
 			});
-			waits(10);
-			runs(function () {
+		});
+		it("resets even if you don't pass a callback", function (done) {
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			brute.reset('1.2.3.4', null);
+			process.nextTick(function () {
 				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy).not.toHaveBeenCalled();
+				errorSpy.should.not.have.been.called;
+				done();
 			});
 		});
 		it ('allows requests if you use different ips', function () {
 			brute.prevent(req(), new ResponseMock(), nextSpy);
-			expect(errorSpy).not.toHaveBeenCalled();
+			errorSpy.should.not.have.been.called;
+			nextSpy.should.have.been.calledOnce;
 			brute.prevent(req2(), new ResponseMock(), nextSpy);
-			expect(errorSpy).not.toHaveBeenCalled();
+			errorSpy.should.not.have.been.called;
+			nextSpy.should.have.been.calledTwice;
 		});
 		it ('passes the correct next request time', function () {
 			var curTime = Date.now(),
 			    expectedTime = curTime+brute.delays[0];
-			runs(function () {
-				var oldNow = brute.now;
-				brute.now = function () { return curTime; };
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				brute.now = oldNow;
-			});
-			waits(1); // ensure some time has passed before calling the next time, caught a bug
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), errorSpy);
-				expect(errorSpy).toHaveBeenCalled();
-				expect(errorSpy.mostRecentCall.args[3].getTime()).toEqual(expectedTime);
-			});
+			
+			var oldNow = brute.now;
+			brute.now = function () { return curTime; };
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			brute.now = oldNow;
 
+			clock.tick(); // ensure some time has passed before calling the next time, caught a bug
+
+			brute.prevent(req(), new ResponseMock(), errorSpy);
+			errorSpy.should.have.been.called;
+			errorSpy.lastCall.args[3].getTime().should.equal(expectedTime);
 		});
 		it('works even after the maxwait is reached', function () {
 			brute = new ExpressBrute(store, {
@@ -162,23 +160,22 @@ describe("express brute", function () {
 				maxWait: 10,
 				failCallback: function () {}
 			});
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				brute.options.failCallback = errorSpy;
-			});
-			waits(brute.delays[0]+1);
-			runs(function () {
-				var curTime = Date.now();
-				    expectedTime = curTime+brute.delays[0];
-				    oldNow = brute.now;
-				brute.now = function () { return curTime; };
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				brute.now = oldNow;
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy).toHaveBeenCalled();
-				expect(errorSpy.mostRecentCall.args[3].getTime()).toEqual(expectedTime);
-			});
+
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			brute.options.failCallback = errorSpy;
+
+			clock.tick(brute.delays[0]+1);
+
+			var curTime = Date.now(),
+			    expectedTime = curTime+brute.delays[0],
+			    oldNow = brute.now;
+			brute.now = function () { return curTime; };
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			brute.now = oldNow;
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.have.been.called;
+			errorSpy.lastCall.args[3].getTime().should.equal(expectedTime);
 		});
 		it('correctly calculates default lifetime', function () {
 			brute = new ExpressBrute(store, {
@@ -187,7 +184,7 @@ describe("express brute", function () {
 				maxWait: 1000,
 				failCallback: errorSpy
 			});
-			expect(brute.options.lifetime).toEqual(8);
+			brute.options.lifetime.should.equal(8);
 		});
 		it('allows requests after the lifetime causes them to expire', function () {
 			brute = new ExpressBrute(store, {
@@ -197,17 +194,15 @@ describe("express brute", function () {
 				lifetime: 1,
 				failCallback: errorSpy
 			});
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy).not.toHaveBeenCalled();
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy).toHaveBeenCalled();
-			});
-			waits((brute.options.lifetime*1000)+1);
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy.calls.length).toEqual(1);
-			});
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.not.have.been.called;
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.have.been.called;
+
+			clock.tick((brute.options.lifetime*1000)+1);
+			
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.have.been.calledOnce;
 		});
 		it("doesn't extend the lifetime if refreshTimeoutOnRequest is false", function () {
 			brute = new ExpressBrute(store, {
@@ -218,22 +213,20 @@ describe("express brute", function () {
 				refreshTimeoutOnRequest: false,
 				failCallback: errorSpy
 			});
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy).not.toHaveBeenCalled();
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy).toHaveBeenCalled();
-			});
-			waits((brute.options.lifetime*500));
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy.calls.length).toEqual(2);
-			});
-			waits((brute.options.lifetime*500)+1);
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy.calls.length).toEqual(2);
-			});
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.not.have.been.called;
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.have.been.calledOnce;
+
+			clock.tick((brute.options.lifetime*500));
+			
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.have.been.calledTwice;
+		
+			clock.tick((brute.options.lifetime*500)+1);
+	
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.have.been.calledTwice;
 		});
 		it('does extend the lifetime if refreshTimeoutOnRequest is true', function () {
 			brute = new ExpressBrute(store, {
@@ -243,20 +236,18 @@ describe("express brute", function () {
 				lifetime: 1,
 				failCallback: errorSpy
 			});
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy).not.toHaveBeenCalled();
-			});
-			waits((brute.options.lifetime*500));
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy).not.toHaveBeenCalled();
-			});
-			waits((brute.options.lifetime*500)+1);
-			runs(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				expect(errorSpy).toHaveBeenCalled();
-			});
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.not.have.been.called;
+
+			clock.tick((brute.options.lifetime*500));
+
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.not.have.been.called;
+
+			clock.tick((brute.options.lifetime*500)+1);
+
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.have.been.calledOnce;
 		});
 		it('allows failCallback to be overridden', function () {
 			brute = new ExpressBrute(store, {
@@ -272,11 +263,11 @@ describe("express brute", function () {
 			});
 
 			mid(req(), new ResponseMock(), nextSpy);
-			expect(errorSpy).not.toHaveBeenCalled();
-			expect(errorSpy2).not.toHaveBeenCalled();
+			errorSpy.should.not.have.been.called;
+			errorSpy2.should.not.have.been.called;
 			mid(req(), new ResponseMock(), nextSpy);
-			expect(errorSpy).not.toHaveBeenCalled();
-			expect(errorSpy2).toHaveBeenCalled();
+			errorSpy.should.not.have.been.called;
+			errorSpy2.should.have.been.called;
 		});
 	});
 	describe("multiple keys", function () {
