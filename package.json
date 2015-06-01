@@ -22,10 +22,10 @@
     "url": "git@github.com:AdamPflug/express-brute.git"
   },
   "devDependencies": {
-    "chai": "^2.3.0",
-    "mocha": "^2.2.5",
-    "sinon": "^1.14.1",
-    "sinon-chai": "^2.7.0"
+    "chai": "~2.3.0",
+    "mocha": "~2.2.5",
+    "sinon": "~1.14.1",
+    "sinon-chai": "~2.7.0"
   },
   "dependencies": {
     "underscore": "~1.5.1"
