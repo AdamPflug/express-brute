@@ -318,6 +318,27 @@ describe("express brute", function () {
 			second(req(), new ResponseMock(), nextSpy);
 			expect(nextSpy.calls.length).toEqual(1);
 		});
+		it('supports ignoring IP', function() {
+			var req = function () {
+				return {
+					connection: {
+						remoteAddress: '1.2.3.4'
+					}
+				};
+			};
+			var req2 = function () {
+				return {
+					connection: {
+						remoteAddress: '4.3.2.1'
+					}
+				};
+			};
+			var first = brute.getMiddleware({key: "something cool", ignoreIP: true});
+			first(req(), new ResponseMock(), nextSpy);
+			expect(nextSpy.calls.length).toEqual(1);
+			first(req2(), new ResponseMock(), nextSpy);
+			expect(nextSpy.calls.length).toEqual(1);
+		});
 		it ('supports brute.reset', function () {
 			var mid = brute.getMiddleware({key: 'withAKey' });
 

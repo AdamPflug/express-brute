@@ -45,7 +45,11 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 	// create middleware
 	return _.bind(function (req, res, next) {
 		keyFunc(req, res, _.bind(function (key) {
-			key = ExpressBrute._getKey([this.getIPFromRequest(req), this.name, key]);
+			if(!options.ignoreIP) {
+				key = ExpressBrute._getKey([this.getIPFromRequest(req), this.name, key]);
+			} else {
+				key = ExpressBrute._getKey([this.name, key]);
+			}
 
 			// attach a simpler "reset" function to req.brute.reset
 			if (this.options.attachResetToRequest) {
