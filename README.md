@@ -49,18 +49,18 @@ An in-memory store for persisting request counts. Don't use this in production, 
 `ExpressBrute` Instance Methods
 -------------------------------
 - `prevent(req, res, next)` Middleware that will bounce requests that happen faster than
-                            the current wait time by calling `failCallback`. Equivilent to `getMiddleware(null)`
+	                        the current wait time by calling `failCallback`. Equivilent to `getMiddleware(null)`
 - `getMiddleware(options)`  Generates middleware that will bounce requests with the same `key` and IP address
-                            that happen faster than the current wait time by calling `failCallback`.
-                            Also attaches a function at `req.brute.reset` that can be called to reset the
-                            counter for the current ip and key. This functions the the `reset` instance method,
-                            but without the need to explicitly pass the `ip` and `key` paramters
-	- `key`           can be a string or alternatively it can be a `function(req, res, next)`
-	                  that or calls `next`, passing a string as the first parameter.
-	- `failCallback`  Allows you to override the value of `failCallback` for this middleware
-	- `ignoreIp`      Disregard IP address when matching requests if set to true. Defaults to false.
+	                        that happen faster than the current wait time by calling `failCallback`.
+	                        Also attaches a function at `req.brute.reset` that can be called to reset the
+	                        counter for the current ip and key. This functions the the `reset` instance method,
+	                        but without the need to explicitly pass the `ip` and `key` paramters
+	- `key`                 can be a string or alternatively it can be a `function(req, res, next)`
+	                        that or calls `next`, passing a string as the first parameter.
+	- `failCallback`        Allows you to override the value of `failCallback` for this middleware
+	- `ignoreIP`            Disregard IP address when matching requests if set to `true`. Defaults to `false`.
 - `reset(ip, key, next)`    Resets the wait time between requests back to its initial value. You can pass `null`
-                            for `key` if you want to reset a request protected by `protect`.
+	                        for `key` if you want to reset a request protected by `protect`.
 - `getIPFromRequest(req)`   Uses the current proxy trust settings to get the current IP from a request object
 
 Built-in Failure Callbacks

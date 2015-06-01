@@ -293,7 +293,7 @@ describe("express brute", function () {
 			second(req(), new ResponseMock(), nextSpy);
 			expect(nextSpy.calls.length).toEqual(1);
 		});
-		it('supports ignoring ip', function() {
+		it('supports ignoring IP', function() {
 			var req = function () {
 				return {
 					connection: {
@@ -308,7 +308,7 @@ describe("express brute", function () {
 					}
 				};
 			};
-			var first = brute.getMiddleware({key: "something cool", ignoreIp: true });
+			var first = brute.getMiddleware({key: "something cool", ignoreIP: true});
 			first(req(), new ResponseMock(), nextSpy);
 			expect(nextSpy.calls.length).toEqual(1);
 			first(req2(), new ResponseMock(), nextSpy);
