@@ -630,7 +630,7 @@ describe("express brute", function () {
 			errorSpy.should.not.have.been.called;
 			nextSpy.should.not.have.been.called;
 		});
-		it.skip('should throw an exception by default', function () {
+		it('should throw an exception by default', function () {
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: 10,
@@ -640,11 +640,12 @@ describe("express brute", function () {
 			sinon.stub(store, 'get', function (key, callback) {
 				callback(err);
 			});
-			var preventSpy = sinon.spy(function () {
+			(function () {
 				brute.prevent(req, res, nextSpy);
+			}).should.throw({
+				message: 'Cannot get request count',
+				parent: err
 			});
-			preventSpy();
-			preventSpy.should.have.thrown;
 			errorSpy.should.not.have.been.called;
 			nextSpy.should.not.have.been.called;
 		});
