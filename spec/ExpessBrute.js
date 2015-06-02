@@ -86,38 +86,27 @@ describe("express brute", function () {
 			errorSpy.should.not.have.been.called;
 		});
 		it ('allows requests if you reset the timer', function (done) {
-			var reset = sinon.spy(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				errorSpy.should.not.have.been.called;
-			});
-
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			errorSpy.should.not.have.been.called;
-			brute.reset('1.2.3.4', null, reset);
-			nextSpy.should.have.been.calledOnce; // fails if reset callback is called synchronously
-
-			process.nextTick(function () {
-				reset.should.have.been.called;
+			var async = false;
+			brute.reset('1.2.3.4', null, function () {
+				async.should.be.true;
+				brute.prevent(req(), new ResponseMock(), nextSpy);
+				errorSpy.should.not.have.been.called;
 				done();
 			});
+			async = true;
 			
 		});
 		it('adds a reset shortcut to the request object', function (done) {
-			var reset = sinon.spy(function () {
-				brute.prevent(req(), new ResponseMock(), nextSpy);
-				errorSpy.should.not.have.been.called;
-			});
-			
 			var reqObj = req();
 			brute.prevent(reqObj, new ResponseMock(), nextSpy);
 			errorSpy.should.not.have.been.called;
 			should.exist(reqObj.brute);
 			should.exist(reqObj.brute.reset);
-			reqObj.brute.reset(reset);
-			nextSpy.should.have.been.calledOnce; // fails if reset callback is called synchronously
-
-			process.nextTick(function () {
-				reset.should.have.been.called;
+			reqObj.brute.reset(function () {
+				brute.prevent(req(), new ResponseMock(), nextSpy);
+				errorSpy.should.not.have.been.called;
 				done();
 			});
 		});
@@ -462,14 +451,9 @@ describe("express brute", function () {
 			nextSpy.should.have.been.calledThrice;
 			errorSpy2.should.have.been.called;
 		});
-		it.skip('resets both brute instances when the req.reset shortcut is called', function (done) {
+		it ('resets both brute instances when the req.reset shortcut is called', function (done) {
 			var failReq = req();
 			var successSpy = sinon.stub();
-			var reset = sinon.spy(function () {
-				brute.prevent(failReq, new ResponseMock(), successSpy);
-				brute2.prevent(failReq, new ResponseMock(), successSpy);
-				successSpy.should.have.been.calledTwice;
-			});
 
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			brute2.prevent(req(), new ResponseMock(), nextSpy);
@@ -482,10 +466,10 @@ describe("express brute", function () {
 			errorSpy.should.have.been.called;
 			errorSpy2.should.have.been.called;
 
-			failReq.brute.reset(reset);
-
-			process.nextTick(function () {
-				reset.should.have.been.calledOnce;
+			failReq.brute.reset(function () {
+				brute.prevent(failReq, new ResponseMock(), successSpy);
+				brute2.prevent(failReq, new ResponseMock(), successSpy);
+				successSpy.should.have.been.calledTwice;
 				done();
 			});
 		});
@@ -501,11 +485,6 @@ describe("express brute", function () {
 
 			var failReq = req();
 			var successStub = sinon.stub();
-			var reset = sinon.spy(function () {
-				brute.prevent(failReq, new ResponseMock(), successStub);
-				brute2.prevent(failReq, new ResponseMock(), successStub);
-				successStub.should.have.been.called.once;
-			});
 
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			brute2.prevent(req(), new ResponseMock(), nextSpy);
@@ -518,10 +497,10 @@ describe("express brute", function () {
 			errorSpy.should.have.been.called;
 			errorSpy2.should.have.been.called;
 
-			failReq.brute.reset(reset);
-
-			process.nextTick(function () {
-				reset.should.have.been.calledOnce;
+			failReq.brute.reset(function () {
+				brute.prevent(failReq, new ResponseMock(), successStub);
+				brute2.prevent(failReq, new ResponseMock(), successStub);
+				successStub.should.have.been.called.once;
 				done();
 			});
 		});
