@@ -1,7 +1,8 @@
+var sinon = require("sinon");
 module.exports = function () {
 	return {
-		status: jasmine.createSpy(),
-		send: jasmine.createSpy(),
-		header: jasmine.createSpy()
+		status: sinon.stub(),
+		send: sinon.stub(),
+		header: sinon.stub()
 	};
 };
