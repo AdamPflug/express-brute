@@ -159,6 +159,12 @@ app.post('/auth',
 
 Changelog
 ---------
+### v0.6.0
+* NEW: Added new ignoreIP option. (Thanks [Magnitus-](https://github.com/Magnitus-)!)
+* CHANGED: `.reset` callbacks are now always called asyncronously, regardless of the implementation of the store (particularly effects `MemoryStore`).
+* CHANGED: Unit tests have been converted from Jasmine to Mocha/Chai/Sinon
+* BUG: Fixed a crash when .reset was called without a callback function
+
 ### v0.5.3
 * NEW: Added the `handleStoreError` option to allow more customizable handling of errors that are thrown by the persistent store. Default behavior is to throw the errors as an exception - there is nothing ExpressBrute can do to recover.
 * CHANGED: Errors thrown as a result of errors raised by the store now include the store's error as well, for debugging purposes.
