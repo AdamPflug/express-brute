@@ -650,4 +650,31 @@ describe("express brute", function () {
 			nextSpy.should.not.have.been.called;
 		});
 	});
+	describe('MemoryStore', function () {
+		it('supports timeouts of greater than 24.8 days (64 bit timeouts)', function () {
+			var yearInSeconds = 60*60*24*365;
+			var store = new ExpressBrute.MemoryStore();
+			var errorSpy = sinon.stub();
+			var nextSpy = sinon.stub();
+			var req = function () { return { connection: { remoteAddress: '1.2.3.4' }}; };
+			var brute = new ExpressBrute(store, {
+				freeRetries: 0,
+				minWait: (yearInSeconds+100)*1000,
+				maxWait: (yearInSeconds+100)*1000,
+				lifetime: yearInSeconds,
+				failCallback: errorSpy
+			});
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.not.have.been.called;
+			clock.tick((brute.options.lifetime-100)*1000);
+
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.have.been.called;
+
+			clock.tick(101*1000);
+			
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.have.been.calledOnce;
+		});
+	});
 });

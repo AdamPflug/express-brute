@@ -28,6 +28,7 @@
     "sinon-chai": "~2.7.0"
   },
   "dependencies": {
+    "long-timeout": "0.0.2",
     "underscore": "~1.5.1"
   }
 }
