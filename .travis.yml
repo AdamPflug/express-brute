@@ -1,7 +1,6 @@
 language: node_js
 sudo: false
 after_script:
-	- ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec
-	- cat ./coverage/lcov.info | ./bin/coveralls.js --verbose
+  - ./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha --report lcovonly -- -R spec && cat ./coverage/lcov.info | ./bin/coveralls.js --verbose
 node_js:
   - 0.8
