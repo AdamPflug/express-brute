@@ -1,7 +1,8 @@
 express-brute
 =============
-[![Build Status](https://travis-ci.org/AdamPflug/express-brute.png?branch=master)](https://travis-ci.org/AdamPflug/express-brute)
 [![NPM version](https://badge.fury.io/js/express-brute.png)](http://badge.fury.io/js/express-brute)
+[![Build Status](https://travis-ci.org/AdamPflug/express-brute.png?branch=master)](https://travis-ci.org/AdamPflug/express-brute)
+[![Coverage Status](http://coveralls.io/repos/AdamPflug/express-brute/badge.svg?branch=master&service=github)](http://coveralls.io/github/AdamPflug/express-brute?branch=master)
 
 A brute-force protection middleware for express routes that rate-limits incoming requests, increasing the delay with each request in a fibonacci-like sequence.
 
