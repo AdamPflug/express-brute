@@ -54,7 +54,7 @@ An in-memory store for persisting request counts. Don't use this in production, 
 - `getMiddleware(options)`  Generates middleware that will bounce requests with the same `key` and IP address
 	                        that happen faster than the current wait time by calling `failCallback`.
 	                        Also attaches a function at `req.brute.reset` that can be called to reset the
-	                        counter for the current ip and key. This functions the the `reset` instance method,
+	                        counter for the current ip and key. This functions as the `reset` instance method,
 	                        but without the need to explicitly pass the `ip` and `key` paramters
 	- `key`                 can be a string or alternatively it can be a `function(req, res, next)`
 	                        that or calls `next`, passing a string as the first parameter.
