@@ -189,13 +189,11 @@ var setRetryAfter = function (res, nextValidRequestDate) {
 };
 ExpressBrute.FailTooManyRequests = function (req, res, next, nextValidRequestDate) {
 	setRetryAfter(res, nextValidRequestDate);
-	res.status(429);
-	res.send({error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
+	res.status(429).send({error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
 };
 ExpressBrute.FailForbidden = function (req, res, next, nextValidRequestDate) {
 	setRetryAfter(res, nextValidRequestDate);
-	res.status(403);
-	res.send({error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
+	res.status(403).send({error: {text: "Too many requests in this time frame.", nextValidRequestDate: nextValidRequestDate}});
 };
 ExpressBrute.FailMark = function (req, res, next, nextValidRequestDate) {
 	res.status(429);
