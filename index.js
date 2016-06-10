@@ -175,7 +175,7 @@ ExpressBrute.prototype.getIPFromRequest = function (req) {
 	if (this.options.proxyDepth && this.options.proxyDepth > 0 && req.get('X-Forwarded-For')) {
 		var ips = req.get('X-Forwarded-For').split(/ *, */);
 		if (this.options.proxyDepth < ips.length) {
-			return ips[ips.length - this.options.proxyDepth - 1];
+			return ips[ips.length - this.options.proxyDepth];
 		} else if (ips.length >= 1) {
 			return ips[0];
 		}

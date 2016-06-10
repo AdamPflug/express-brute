@@ -367,7 +367,7 @@ describe("express brute", function () {
 						remoteAddress: '1.2.3.4'
 					},
 					get: function () {
-						return '4.5.6.7, 3.4.5.6, 2.3.4.5, 1.2.3.4';
+						return '4.5.6.7, 3.4.5.6, 2.3.4.5';
 					}
 				};
 			};
