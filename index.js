@@ -46,7 +46,7 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 	return _.bind(function (req, res, next) {
 		keyFunc(req, res, _.bind(function (key) {
 			if(!options.ignoreIP) {
-				key = ExpressBrute._getKey([this.getIPFromRequest(req), this.name, key]);
+				key = ExpressBrute._getKey([req.ip, this.name, key]);
 			} else {
 				key = ExpressBrute._getKey([this.name, key]);
 			}
@@ -170,17 +170,6 @@ ExpressBrute.prototype.reset = function (ip, key, callback) {
 };
 ExpressBrute.prototype.now = function () {
 	return Date.now();
-};
-ExpressBrute.prototype.getIPFromRequest = function (req) {
-	if (this.options.proxyDepth && this.options.proxyDepth > 0 && req.get('X-Forwarded-For')) {
-		var ips = req.get('X-Forwarded-For').split(/ *, */);
-		if (this.options.proxyDepth < ips.length) {
-			return ips[ips.length - this.options.proxyDepth - 1];
-		} else if (ips.length >= 1) {
-			return ips[0];
-		}
-	}
-	return req.connection.remoteAddress;
 };
 
 var setRetryAfter = function (res, nextValidRequestDate) {

@@ -40,7 +40,6 @@ Classes
 	- `maxWait`                 The maximum amount of time (in milliseconds) between requests the user needs to wait (default: 15 minutes). The wait for a given request is determined by adding the time the user needed to wait for the previous two requests.
 	- `lifetime`                The length of time (in seconds since the last request) to remember the number of requests that have been made by an IP. By default it will be set to `maxWait * the number of attempts before you hit maxWait` to discourage simply waiting for the lifetime to expire before resuming an attack. With default values this is about 6 hours.
 	- `failCallback`            Gets called with (`req`, `resp`, `next`, `nextValidRequestDate`) when a request is rejected (default: ExpressBrute.FailForbidden)
-	- `proxyDepth`              Specifies how many levels of the `X-Forwarded-For` header to trust. If your web server is behind a CDN and/or load balancer you'll need to set this to however many levels of proxying it's behind to get a valid IP. Setting this too high allows attackers to get around brute force protection by spoofing the `X-Forwarded-For` header, so don't set it higher than you need to (default: 0)
 	- `attachResetToRequest`    Specify whether or not a simplified reset method should be attached at `req.brute.reset`. The simplified method takes only a callback, and resets all `ExpressBrute` middleware that was called on the current request. If multiple instances of `ExpressBrute` have middleware on the same request, only those with `attachResetToRequest` set to true will be reset (default: true)
 	- `refreshTimeoutOnRequest` Defines whether the `lifetime` counts from the time of the last request that ExpressBrute didn't prevent for a given IP (true) or from of that IP's first request (false). Useful for allowing limits over fixed periods of time, for example: a limited number of requests per day. (Default: true). [More info](https://github.com/AdamPflug/express-brute/issues/14)
 	- `handleStoreError`        Gets called whenever an error occurs with the persistent store from which ExpressBrute cannot recover. It is passed an object containing the properties `message` (a description of the message), `parent` (the error raised by the session store), and [`key`, `ip`] or [`req`, `res`, `next`] depending on whether or the error occurs during `reset` or in the middleware itself.
@@ -118,7 +117,6 @@ var handleStoreError = handleStoreError: function (error) {
 // Start slowing requests after 5 failed attempts to do something for the same user
 var userBruteforce = new ExpressBrute(store, {
 	freeRetries: 5,
-	proxyDepth: 1,
 	minWait: 5*60*1000, // 5 minutes
 	maxWait: 60*60*1000, // 1 hour,
 	failCallback: failCallback,
@@ -128,7 +126,6 @@ var userBruteforce = new ExpressBrute(store, {
 // No more than 1000 login attempts per day per IP
 var globalBruteforce = new ExpressBrute(store, {
 	freeRetries: 1000,
-	proxyDepth: 1,
 	attachResetToRequest: false,
 	refreshTimeoutOnRequest: false,
 	minWait: 25*60*60*1000, // 1 day 1 hour (should never reach this wait time)
@@ -138,6 +135,7 @@ var globalBruteforce = new ExpressBrute(store, {
 	handleStoreError: handleStoreError
 });
 
+app.set('trust proxy', 1); // Don't set to "true", it's not secure. Make sure it matches your environment
 app.post('/auth',
 	globalBruteforce.prevent,
 	userBruteforce.getMiddleware({
@@ -162,6 +160,10 @@ app.post('/auth',
 
 Changelog
 ---------
+### v0.7.0
+* NEW: Updated to use `Express` 4.x as a peer dependency.
+* REMOVED: `proxyDepth` option on `ExpressBrute` has been removed. Use `app.set('trust proxy', x)` from Express 4 instead. [More Info](http://expressjs.com/en/guide/behind-proxies.html)
+
 ### v0.6.0
 * NEW: Added new ignoreIP option. (Thanks [Magnitus-](https://github.com/Magnitus-)!)
 * CHANGED: `.reset` callbacks are now always called asyncronously, regardless of the implementation of the store (particularly effects `MemoryStore`).

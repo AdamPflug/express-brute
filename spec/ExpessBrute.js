@@ -31,8 +31,8 @@ describe("express brute", function () {
 			store = new ExpressBrute.MemoryStore();
 			errorSpy = sinon.stub();
 			nextSpy = sinon.stub();
-			req = function () { return { connection: { remoteAddress: '1.2.3.4' }}; };
-			req2 = function () { return { connection: { remoteAddress: '5.6.7.8' }}; };
+			req = function () { return { ip: '1.2.3.4' }; };
+			req2 = function () { return { ip: '5.6.7.8' }; };
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: 10,
@@ -96,7 +96,7 @@ describe("express brute", function () {
 				done();
 			});
 			async = true;
-			
+
 		});
 		it('adds a reset shortcut to the request object', function (done) {
 			var reqObj = req();
@@ -130,7 +130,7 @@ describe("express brute", function () {
 		it ('passes the correct next request time', function () {
 			var curTime = Date.now(),
 			    expectedTime = curTime+brute.delays[0];
-			
+
 			var oldNow = brute.now;
 			brute.now = function () { return curTime; };
 			brute.prevent(req(), new ResponseMock(), nextSpy);
@@ -189,7 +189,7 @@ describe("express brute", function () {
 			errorSpy.should.have.been.called;
 
 			clock.tick((brute.options.lifetime*1000)+1);
-			
+
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			errorSpy.should.have.been.calledOnce;
 		});
@@ -208,12 +208,12 @@ describe("express brute", function () {
 			errorSpy.should.have.been.calledOnce;
 
 			clock.tick((brute.options.lifetime*500));
-			
+
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			errorSpy.should.have.been.calledTwice;
-		
+
 			clock.tick((brute.options.lifetime*500)+1);
-	
+
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			errorSpy.should.have.been.calledTwice;
 		});
@@ -266,7 +266,7 @@ describe("express brute", function () {
 			store = new ExpressBrute.MemoryStore();
 			errorSpy = sinon.stub();
 			nextSpy = sinon.stub();
-			req = function () { return { connection: { remoteAddress: '1.2.3.4' }}; };
+			req = function () { return { ip: '1.2.3.4' }; };
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: 10,
@@ -291,9 +291,7 @@ describe("express brute", function () {
 		it ('supports key functions', function () {
 			req = function () {
 				return {
-					connection: {
-						remoteAddress: '1.2.3.4'
-					},
+					ip: '1.2.3.4',
 					someData: "something cool"
 				};
 			};
@@ -310,16 +308,12 @@ describe("express brute", function () {
 		it('supports ignoring IP', function() {
 			var req = function () {
 				return {
-					connection: {
-						remoteAddress: '1.2.3.4'
-					}
+					ip: '1.2.3.4'
 				};
 			};
 			var req2 = function () {
 				return {
-					connection: {
-						remoteAddress: '4.3.2.1'
-					}
+					ip: '4.3.2.1'
 				};
 			};
 			var first = brute.getMiddleware({key: "something cool", ignoreIP: true});
@@ -355,59 +349,6 @@ describe("express brute", function () {
 			should.not.exist(firstReq.brute);
 		});
 	});
-	describe('proxy severs', function () {
-		var brute, store, errorSpy, nextSpy, req, req2;
-		beforeEach(function () {
-			store = new ExpressBrute.MemoryStore();
-			errorSpy = sinon.stub();
-			nextSpy = sinon.stub();
-			req = function () {
-				return {
-					connection: {
-						remoteAddress: '1.2.3.4'
-					},
-					get: function () {
-						return '4.5.6.7, 3.4.5.6, 2.3.4.5, 1.2.3.4';
-					}
-				};
-			};
-			req2 = function () {
-				return {
-					connection: {
-						remoteAddress: '1.2.3.4'
-					},
-					get: function () {
-						return;
-					}
-				};
-			};
-			brute = new ExpressBrute(store, {
-				freeRetries: 0,
-				minWait: 100,
-				maxWait: 1000,
-				failCallback: errorSpy,
-				lifetime: 0
-			});
-		});
-		it ('gets the the right IP with when there is no x-forwared-for', function () {
-			brute.getIPFromRequest(req2()).should.equal('1.2.3.4');
-		});
-		it ('gets the the right IP with when there is no x-forwared-for and proxyDepth > 0', function () {
-			brute.options.proxyDepth = 1;
-			brute.getIPFromRequest(req2()).should.equal('1.2.3.4');
-		});
-		it ('gets the the right IP with when proxyDepth is 0', function () {
-			brute.getIPFromRequest(req()).should.equal('1.2.3.4');
-		});
-		it ('gets the the right IP with when proxyDepth is greater than 0', function () {
-			brute.options.proxyDepth = 1;
-			brute.getIPFromRequest(req()).should.equal('2.3.4.5');
-		});
-		it ('gets the the right IP with when proxyDepth is greater than the x-forwared-for length', function () {
-			brute.options.proxyDepth = 10;
-			brute.getIPFromRequest(req()).should.equal('4.5.6.7');
-		});
-	});
 	describe("multiple brute instances", function () {
 		var brute, brute2, store, errorSpy, errorSpy2, nextSpy, req;
 		beforeEach(function () {
@@ -415,7 +356,7 @@ describe("express brute", function () {
 			errorSpy = sinon.stub();
 			errorSpy2 = sinon.stub();
 			nextSpy = sinon.stub();
-			req = function () { return { connection: { remoteAddress: '1.2.3.4' }}; };
+			req = function () { return { ip: '1.2.3.4' }; };
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: 100,
@@ -441,13 +382,13 @@ describe("express brute", function () {
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			brute2.prevent(req(), new ResponseMock(), nextSpy);
 
-		
+
 			errorSpy.should.have.been.called;
 			errorSpy2.should.not.have.been.called;
 
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			brute2.prevent(req(), new ResponseMock(), nextSpy);
-		
+
 			nextSpy.should.have.been.calledThrice;
 			errorSpy2.should.have.been.called;
 		});
@@ -509,7 +450,7 @@ describe("express brute", function () {
 		var brute, store, req, nextSpy;
 		beforeEach(function () {
 			store = new ExpressBrute.MemoryStore();
-			req = function () { return { connection: { remoteAddress: '1.2.3.4' }}; };
+			req = function () { return { ip: '1.2.3.4' }; };
 			nextSpy = sinon.stub();
 
 		});
@@ -574,7 +515,7 @@ describe("express brute", function () {
 			errorSpy = sinon.stub();
 			storeErrorSpy = sinon.stub();
 			nextSpy = sinon.stub();
-			req = { connection: { remoteAddress: '1.2.3.4' }};
+			req = { ip: '1.2.3.4' };
 			res = new ResponseMock();
 			err = "Example Error";
 			brute = new ExpressBrute(store, {
@@ -656,7 +597,7 @@ describe("express brute", function () {
 			var store = new ExpressBrute.MemoryStore();
 			var errorSpy = sinon.stub();
 			var nextSpy = sinon.stub();
-			var req = function () { return { connection: { remoteAddress: '1.2.3.4' }}; };
+			var req = function () { return { ip: '1.2.3.4' }; };
 			var brute = new ExpressBrute(store, {
 				freeRetries: 0,
 				minWait: (yearInSeconds+100)*1000,
@@ -672,7 +613,7 @@ describe("express brute", function () {
 			errorSpy.should.have.been.called;
 
 			clock.tick(101*1000);
-			
+
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			errorSpy.should.have.been.calledOnce;
 		});
