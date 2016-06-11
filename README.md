@@ -1,8 +1,10 @@
 express-brute
 =============
-[![NPM version](https://badge.fury.io/js/express-brute.png)](http://badge.fury.io/js/express-brute)
-[![Build Status](https://travis-ci.org/AdamPflug/express-brute.png?branch=master)](https://travis-ci.org/AdamPflug/express-brute)
-[![Coverage Status](http://coveralls.io/repos/AdamPflug/express-brute/badge.svg?branch=master&service=github)](http://coveralls.io/github/AdamPflug/express-brute?branch=master)
+[![NPM Version](https://badge.fury.io/js/express-brute.png)](http://badge.fury.io/js/express-brute)
+[![NPM Downloads](https://img.shields.io/npm/dm/express-brute.svg?maxAge=2592000)](http://badge.fury.io/js/express-brute)
+[![Build Status](https://img.shields.io/travis/AdamPflug/express-brute.svg?maxAge=2592000)]()(https://travis-ci.org/AdamPflug/express-brute)
+[![Coverage Status](https://img.shields.io/coveralls/AdamPflug/express-brute.svg?maxAge=2592000)](http://coveralls.io/github/AdamPflug/express-brute?branch=master)
+[![Dependency Status](https://img.shields.io/david/AdamPflug/express-brute.svg?maxAge=2592000)](https://david-dm.org/adampflug/express-brute)
 
 A brute-force protection middleware for express routes that rate-limits incoming requests, increasing the delay with each request in a fibonacci-like sequence.
 
