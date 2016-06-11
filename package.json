@@ -1,6 +1,6 @@
 {
   "name": "express-brute",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A brute-force protection middleware for express routes that rate limits incoming requests",
   "keywords": [
     "brute",
@@ -22,16 +22,16 @@
     "url": "git@github.com:AdamPflug/express-brute.git"
   },
   "devDependencies": {
-    "chai": "~2.3.0",
-    "coveralls": "~2.11.3",
-    "istanbul": "~0.3.17",
-    "mocha": "~2.2.5",
-    "mocha-lcov-reporter": "0.0.2",
-    "sinon": "~1.14.1",
-    "sinon-chai": "~2.7.0"
+    "chai": "~3.5.0",
+    "coveralls": "~2.11.9",
+    "istanbul": "~0.4.3",
+    "mocha": "~2.4.5",
+    "mocha-lcov-reporter": "~1.2.0",
+    "sinon": "~1.17.3",
+    "sinon-chai": "~2.8.0"
   },
   "dependencies": {
-    "long-timeout": "0.0.2",
-    "underscore": "~1.5.1"
+    "long-timeout": "~0.1.1",
+    "underscore": "~1.8.3"
   }
 }
