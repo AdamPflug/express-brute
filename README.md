@@ -63,7 +63,6 @@ An in-memory store for persisting request counts. Don't use this in production, 
 	- `ignoreIP`            Disregard IP address when matching requests if set to `true`. Defaults to `false`.
 - `reset(ip, key, next)`    Resets the wait time between requests back to its initial value. You can pass `null`
 	                        for `key` if you want to reset a request protected by `protect`.
-- `getIPFromRequest(req)`   Uses the current proxy trust settings to get the current IP from a request object
 
 Built-in Failure Callbacks
 ---------------------------
@@ -160,9 +159,10 @@ app.post('/auth',
 
 Changelog
 ---------
-### v0.7.0
+### v1.0.0
 * NEW: Updated to use `Express` 4.x as a peer dependency.
 * REMOVED: `proxyDepth` option on `ExpressBrute` has been removed. Use `app.set('trust proxy', x)` from Express 4 instead. [More Info](http://expressjs.com/en/guide/behind-proxies.html)
+* REMOVED: `getIPFromRequest(req)` has been removed from instances, use `req.ip` instead. 
 
 ### v0.6.0
 * NEW: Added new ignoreIP option. (Thanks [Magnitus-](https://github.com/Magnitus-)!)
