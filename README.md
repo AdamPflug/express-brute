@@ -77,6 +77,7 @@ There are a number adapters that have been written to allow ExpressBrute to be u
 - [Memcached](https://github.com/AdamPflug/express-brute-memcached)
 - [Redis](https://github.com/AdamPflug/express-brute-redis)
 - [MongoDB](https://github.com/auth0/express-brute-mongo)
+- [Mongoose](https://github.com/cbargren/express-brute-mongoose)
 - [Sequelize (SQL)](https://github.com/maddy2get/express-brute-sequelize)
 - [Knex.js (SQL)](https://github.com/llambda/brute-knex)
 - [RethinkDB](https://github.com/llambda/brute-rethinkdb)
@@ -162,7 +163,7 @@ Changelog
 ### v1.0.0
 * NEW: Updated to use `Express` 4.x as a peer dependency.
 * REMOVED: `proxyDepth` option on `ExpressBrute` has been removed. Use `app.set('trust proxy', x)` from Express 4 instead. [More Info](http://expressjs.com/en/guide/behind-proxies.html)
-* REMOVED: `getIPFromRequest(req)` has been removed from instances, use `req.ip` instead. 
+* REMOVED: `getIPFromRequest(req)` has been removed from instances, use `req.ip` instead.
 
 ### v0.6.0
 * NEW: Added new ignoreIP option. (Thanks [Magnitus-](https://github.com/Magnitus-)!)
