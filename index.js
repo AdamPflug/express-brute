@@ -123,7 +123,7 @@ ExpressBrute.prototype.getMiddleware = function (options) {
 					}
 				}
 
-				if (nextValidRequestTime <= this.now()) {
+				if (nextValidRequestTime <= this.now() || count <= this.options.freeRetries) {
 					this.store.set(key, {
 						count: count+1,
 						lastRequest: new Date(this.now()),

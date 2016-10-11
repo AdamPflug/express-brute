@@ -56,6 +56,20 @@ describe("express brute", function () {
 			brute.prevent(req(), new ResponseMock(), nextSpy);
 			errorSpy.should.have.been.called;
 		});
+		it('respects free retries even with clock skew', function() {
+			brute = new ExpressBrute(store, {
+				freeRetries: 1,
+				minWait: 10,
+				maxWait: 100,
+				failCallback: errorSpy
+			});
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			clock.tick(-100);
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.not.have.been.called;
+			brute.prevent(req(), new ResponseMock(), nextSpy);
+			errorSpy.should.have.been.called;
+		});
 		it('correctly calculates delays when min and max wait are the same', function () {
 			brute = new ExpressBrute(store, {
 				freeRetries: 0,
