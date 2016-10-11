@@ -161,6 +161,9 @@ app.post('/auth',
 
 Changelog
 ---------
+### v1.0.1
+* BUG: Fixed an edge case where freeretries weren't being respected if app servers had slightly different times
+
 ### v1.0.0
 * NEW: Updated to use `Express` 4.x as a peer dependency.
 * REMOVED: `proxyDepth` option on `ExpressBrute` has been removed. Use `app.set('trust proxy', x)` from Express 4 instead. [More Info](http://expressjs.com/en/guide/behind-proxies.html)
