@@ -62,7 +62,7 @@ An in-memory store for persisting request counts. Don't use this in production, 
 	- `failCallback`        Allows you to override the value of `failCallback` for this middleware
 	- `ignoreIP`            Disregard IP address when matching requests if set to `true`. Defaults to `false`.
 - `reset(ip, key, next)`    Resets the wait time between requests back to its initial value. You can pass `null`
-	                        for `key` if you want to reset a request protected by `protect`.
+	                        for `key` if you want to reset a request protected by `prevent`.
 
 Built-in Failure Callbacks
 ---------------------------
