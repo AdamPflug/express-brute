@@ -58,7 +58,7 @@ An in-memory store for persisting request counts. Don't use this in production, 
 	                        counter for the current ip and key. This functions as the `reset` instance method,
 	                        but without the need to explicitly pass the `ip` and `key` paramters
 	- `key`                 can be a string or alternatively it can be a `function(req, res, next)`
-	                        that or calls `next`, passing a string as the first parameter.
+	                        that calls `next`, passing a string as the first parameter.
 	- `failCallback`        Allows you to override the value of `failCallback` for this middleware
 	- `ignoreIP`            Disregard IP address when matching requests if set to `true`. Defaults to `false`.
 - `reset(ip, key, next)`    Resets the wait time between requests back to its initial value. You can pass `null`
