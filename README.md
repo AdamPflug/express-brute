@@ -109,7 +109,7 @@ var failCallback = function (req, res, next, nextValidRequestDate) {
 	req.flash('error', "You've made too many failed attempts in a short period of time, please try again "+moment(nextValidRequestDate).fromNow());
 	res.redirect('/login'); // brute force protection triggered, send them back to the login page
 };
-var handleStoreError = handleStoreError: function (error) {
+var handleStoreError = function (error) {
 	log.error(error); // log this error so we can figure out what went wrong
 	// cause node to exit, hopefully restarting the process fixes the problem
 	throw {
