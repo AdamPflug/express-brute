@@ -124,7 +124,6 @@ var userBruteforce = new ExpressBrute(store, {
 	maxWait: 60*60*1000, // 1 hour,
 	failCallback: failCallback,
 	handleStoreError: handleStoreError
-}
 });
 // No more than 1000 login attempts per day per IP
 var globalBruteforce = new ExpressBrute(store, {
