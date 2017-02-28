@@ -67,7 +67,7 @@ An in-memory store for persisting request counts. Don't use this in production, 
 Built-in Failure Callbacks
 ---------------------------
 There are some built-in callbacks that come with BruteExpress that handle some common use cases.
-- `ExpressBrute.FailTooManyRquests` Terminates the request and responses with a 429 (Too Many Requests) error that has a `Retry-After` header and a JSON error message.
+- `ExpressBrute.FailTooManyRequests` Terminates the request and responses with a 429 (Too Many Requests) error that has a `Retry-After` header and a JSON error message.
 - `ExpressBrute.FailForbidden` Terminates the request and responds with a 403 (Forbidden) error that has a `Retry-After` header and a JSON error message. This is provided for compatibility with ExpressBrute versions prior to v0.5.0, for new users `FailTooManyRequests` is the preferred behavior.
 - `ExpressBrute.FailMark` Sets res.nextValidRequestDate, the Retry-After header and the res.status=429, then calls next() to pass the request on to the appropriate routes.
 
