@@ -84,6 +84,7 @@ There are a number adapters that have been written to allow ExpressBrute to be u
 - [Loki.js](https://github.com/Requarks/express-brute-loki)
 - [nedb](https://github.com/natsukagami/express-brute-nedb)
 - [PostgreSQL](https://github.com/dmfay/express-brute-pg)
+- [MS Sql Server](https://github.com/reg0/express-brute-mssql)
 - [Couchbase](https://github.com/kvaillant/express-brute-couchbase)
 
 If you write your own store and want me to add it to the list, just drop me an [email](mailto:adam.pflug@gmail.com) or [create an issue](https://github.com/AdamPflug/express-brute/issues/new).
