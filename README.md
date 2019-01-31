@@ -8,6 +8,8 @@ express-brute
 
 A brute-force protection middleware for express routes that rate-limits incoming requests, increasing the delay with each request in a fibonacci-like sequence.
 
+Note, it uses get and set methods to count number of requests, so there may be race conditions on concurrent requests.
+
 Installation
 ------------
   via npm:
