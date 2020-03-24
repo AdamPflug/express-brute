@@ -167,8 +167,6 @@ If your application is behind a proxy (Apache, Nginx) you should not forget set 
 ```
 app.set('trust proxy', 1);
 ```
-Please note the recommended value **1**. Don't use **true** becauseit will allow bypass the middleware of the express brute functionally, you just have to give the value **1** because of proxy depth.
-You can check the whole explanation on the official link: [Express behind proxies](https://expressjs.com/en/guide/behind-proxies.html)
 
 Changelog
 ---------
