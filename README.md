@@ -161,6 +161,13 @@ app.post('/auth',
 );
 ```
 
+Behind a Proxy
+--------------
+If your application is behind a proxy (Apache, Nginx) you should not forget set the **trust proxy** param on your Express application.
+```
+app.set('trust proxy', 1);
+```
+
 Changelog
 ---------
 ### v1.0.1
