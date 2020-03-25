@@ -161,14 +161,13 @@ app.post('/auth',
 );
 ```
 
-Behind a Proxy
---------------
-If your application is behind a proxy (Apache, Nginx) you should not forget set the **trust proxy** param on your Express application.
+Behind Proxy Servers
+--------------------
+If your application is behind a proxy (Apache, Nginx, load balancer, CDN, etc) you should not forget set the **trust proxy** param as appropriate for your Express application. For example:
 ```
 app.set('trust proxy', 1);
 ```
-Please note the recommended value **1**. Don't use **true** becauseit will allow bypass the middleware of the express brute functionally, you just have to give the value **1** because of proxy depth.
-You can check the whole explanation on the official link: [Express behind proxies](https://expressjs.com/en/guide/behind-proxies.html)
+Please note: don't use the value `true` because tells express to trust the whole `X-Forwarded-For` chain, which could allow an attacker to bypass the express brute protections by spoofing source ips. The easiest solution is probably to set your proxy depth appropriately, but for more information on other options see [Express' behind proxies guide](https://expressjs.com/en/guide/behind-proxies.html)
 
 Changelog
 ---------
