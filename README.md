@@ -19,7 +19,8 @@ A Simple Example
 ``` js
 var ExpressBrute = require('express-brute');
 
-var store = new ExpressBrute.MemoryStore(); // stores state locally, don't use this in production
+// stores state locally, don't use this in production
+var store = new ExpressBrute.MemoryStore();
 var bruteforce = new ExpressBrute(store);
 
 app.post('/auth',
