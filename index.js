@@ -196,7 +196,7 @@ ExpressBrute._getKey = function (arr) {
 	var key = '';
 	_(arr).each(function (part) {
 		if (part) {
-			key += crypto.createHash('sha256').update(part).digest('base64');
+			key += crypto.createHash('sha256').update(String(part)).digest('base64');
 		}
 	});
 	return crypto.createHash('sha256').update(key).digest('base64');
